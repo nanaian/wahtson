@@ -2,4 +2,3 @@ node_modules
 config.toml
 build
 database.sqlite
-package-lock.json
