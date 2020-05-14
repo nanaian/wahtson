@@ -43,10 +43,11 @@ module.exports = {
                 image: {
                     url: (source.message.attachments.first() || {}).proxyURL,
                 },
-                //url: source.message.url, // Doesn't appear to work >:[
-                description: source.message.content.replace(/([\[\]\(\)])/g, '\\$&')+`\n[Jump to Message](${source.message.url})`,
+                description: `${escapeMarkdown(source.message.content)}\n[Jump to Message](${source.message.url})`,
                 timestamp: source.message.createdTimestamp
             },
         })
     },
 }
+
+const escapeMarkdown = s => s.replace(/([\[\]\(\)])/g, '\\$&')
