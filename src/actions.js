@@ -88,12 +88,40 @@ module.exports = {
     
     async GET_BALANCE(source, opts, state) {
         var balance = await getBalance(source.member.id, state)
-        source.channel.send(opts.getText("text").replace("$coins",balance))
+        var placeholders = { "$balance": balance }
+        source.channel.send(replacePlaceholders(opts.getText('text'), placeholders))
     },
 
     async PURCHASE_ITEM(source, opts, state) {
-        
+        var purchase = await state.db.get('SELECT * FROM purchases WHERE userid = ? AND item = ?', source.member.id, opts.getText('item'));
+        var balance = await getBalance(source.member.id, state)
+
+        var placeholders = { "$item" : opts.getText('item'), "$balance" : balance, "$outstanding" : opts.getNumber('price')-balance };
+
+        if(purchase == undefined) {
+            if(balance >= opts.getNumber('price')) {
+                state.db.run('UPDATE users SET balance = ? WHERE id = ?', balance-opts.getNumber('price'), source.member.id);
+                await state.db.run('INSERT INTO purchases (userid, item) VALUES (?, ?)', source.member.id, opts.getText('item'));
+                source.channel.send(replacePlaceholders(opts.getText('text_success'), placeholders))
+            } else {
+                source.channel.send(replacePlaceholders(opts.getText('text_poor'), placeholders))
+            }
+        } else {
+            source.channel.send(replacePlaceholders(opts.getText('text_duplicate'), placeholders))
+        }
     },
+
+    async GIVE_COINS(source, opts, state) {
+        var balance = await getBalance(source.member.id, state)
+        state.db.run('UPDATE users SET balance = ? WHERE id = ?', balance+opts.getNumber('amount'), source.member.id);
+    },
+}
+
+const replacePlaceholders = (str, placeholders) => {
+    Object.keys(placeholders).forEach((p) => {
+        str = str.replace(p, placeholders[p]);
+    });
+    return str;
 }
 
 const escapeMarkdown = s => s.replace(/([\[\]\(\)])/g, '\\$&')
@@ -118,11 +146,11 @@ const fileExtension = url => {
 }
 
 const getBalance = async (id, state) => {
-    var balance = await state.db.get('SELECT balance FROM users WHERE id = ?', id);
+    var balance = await state.db.get('SELECT * FROM users WHERE id = ?', id);
     if(balance == undefined || isNaN(balance.balance)) {
         await state.db.run('INSERT INTO users (id, balance) VALUES (?, ?)', id, (await state.config.get('economy')).starting_coins);
     }
-    balance = await state.db.get('SELECT balance FROM users WHERE id = ?', id);
+    balance = await state.db.get('SELECT * FROM users WHERE id = ?', id);
 
     return balance.balance
 }
