@@ -85,6 +85,15 @@ module.exports = {
             },
         })
     },
+    
+    async GET_BALANCE(source, opts, state) {
+        var balance = await getBalance(source.member.id, state)
+        source.channel.send(opts.getText("text").replace("$coins",balance))
+    },
+
+    async PURCHASE_ITEM(source, opts, state) {
+        
+    },
 }
 
 const escapeMarkdown = s => s.replace(/([\[\]\(\)])/g, '\\$&')
@@ -106,4 +115,14 @@ const fileExtension = url => {
     if (!url) return
 
     return url.split('.').pop().split(/\#|\?/)[0]
+}
+
+const getBalance = async (id, state) => {
+    var balance = await state.db.get('SELECT balance FROM users WHERE id = ?', [id]);
+    if(isNaN(balance.balance)) {
+        await state.db.get('INSERT INTO users (id, balance) VALUES (?, ?)', id, (await state.config.get('economy')).starting_coins);
+    }
+    balance = await state.db.get('SELECT balance FROM users WHERE id = ?', [id]);
+
+    return balance.balance
 }

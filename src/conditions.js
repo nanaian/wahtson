@@ -18,4 +18,28 @@ module.exports = {
 	async PREVIOUS_ACTION_SKIPPED(source, opts, state) {
 		return state.previousActionSkipped
 	},
+	
+	async PREVIOUS_ACTION_SKIPPED(source, opts, state) {
+		return state.previousActionSkipped
+	},
+
+	async COST_COINS(source, opts, state) {
+		var balance = await getBalance(source.member.id, state)
+	
+		if(balance >= opts.getNumber('price')) {
+			state.db.run('UPDATE users SET balance = ? WHERE id = ?', balance-opts.getNumber('price'), source.member.id);
+		}
+	
+		return balance >= opts.getNumber('price');
+	},
+}
+
+const getBalance = async (id, state) => {
+    var balance = await state.db.get('SELECT balance FROM users WHERE id = ?', [id]);
+    if(isNaN(balance.balance)) {
+        await state.db.get('INSERT INTO users (id, balance) VALUES (?, ?)', id, (await state.config.get('economy')).starting_coins);
+    }
+    balance = await state.db.get('SELECT balance FROM users WHERE id = ?', [id]);
+
+    return balance.balance
 }
