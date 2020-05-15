@@ -35,6 +35,7 @@ module.exports = {
         const channel = opts.getChannel('to')
 
         channel.send({
+            files: (attachmentType(source.message.attachments.first()) == "video") ? [{ attachment: (source.message.attachments.first() || {}).proxyURL, }] : [],
             embed: {
                 author: {
                     name: source.message.member.displayName,
@@ -43,6 +44,10 @@ module.exports = {
                 image: {
                     url: (source.message.attachments.first() || {}).proxyURL,
                 },
+                fields: [{
+                    name: "Attachments",
+                    value: source.message.attachments.map(a => { return `[${a.proxyURL.substring(a.proxyURL.lastIndexOf('/')+1)}](${a.proxyURL})` }).join("\n")
+                }],
                 description: `${escapeMarkdown(source.message.content)}\n[Jump to Message](${source.message.url})`,
                 timestamp: source.message.createdTimestamp
             },
@@ -51,3 +56,23 @@ module.exports = {
 }
 
 const escapeMarkdown = s => s.replace(/([\[\]\(\)])/g, '\\$&')
+
+const extensionTypes = {
+    "png": "image",
+    "jpg": "image",
+    "jpeg": "image",
+    "gif": "image",
+    "webp": "image",
+    "mp4": "video",
+    "mov": "video",
+    "webm": "video"
+}
+const attachmentType = a => {
+    var extension = fileExtension(a.url);
+    return extensionTypes[extension];
+}
+
+const fileExtension = url => {
+    if(url == undefined) return;
+    return url.split('.').pop().split(/\#|\?/)[0];
+}
