@@ -119,10 +119,14 @@ module.exports = {
 
 const replacePlaceholders = (str, placeholders) => {
     Object.keys(placeholders).forEach((p) => {
-        str = str.replace(p, placeholders[p]);
+        var re = new RegExp(RegExp.quote(p),"g")
+        str = str.replace(re, placeholders[p]);
     });
     return str;
 }
+RegExp.quote = function(str) {
+    return str.replace(/([.?*+^$[\]\\(){}|-])/g, "\\$1");
+};
 
 const escapeMarkdown = s => s.replace(/([\[\]\(\)])/g, '\\$&')
 

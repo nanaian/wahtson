@@ -32,10 +32,14 @@ module.exports = {
 
 const replacePlaceholders = (str, placeholders) => {
     Object.keys(placeholders).forEach((p) => {
-        str = str.replace(p, placeholders[p]);
+        var re = new RegExp(RegExp.quote(p),"g")
+        str = str.replace(re, placeholders[p]);
     });
     return str;
 }
+RegExp.quote = function(str) {
+    return str.replace(/([.?*+^$[\]\\(){}|-])/g, "\\$1");
+};
 
 const getBalance = async (id, state) => {
 	var balance = await state.db.get('SELECT * FROM users WHERE id = ?', id);
