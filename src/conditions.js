@@ -18,28 +18,31 @@ module.exports = {
 	async PREVIOUS_ACTION_SKIPPED(source, opts, state) {
 		return state.previousActionSkipped
 	},
-	
-	async PREVIOUS_ACTION_SKIPPED(source, opts, state) {
-		return state.previousActionSkipped
-	},
 
-	async COST_COINS(source, opts, state) {
+	async REQUIRE_COINS(source, opts, state) {
 		var balance = await getBalance(source.member.id, state)
-		
-		if(balance >= opts.getNumber('price') && deduct != false) {
-			state.db.run('UPDATE users SET balance = ? WHERE id = ?', balance-opts.getNumber('price'), source.member.id);
-		}
 	
-		return balance >= opts.getNumber('price');
+		if(opts.getText('deduct') && balance >= opts.getNumber('amount')) {
+			state.db.run('UPDATE users SET balance = ? WHERE id = ?', balance-opts.getNumber('amount'), source.member.id);
+		}
+
+		return balance >= opts.getNumber('amount');
 	},
 }
 
+const replacePlaceholders = (str, placeholders) => {
+    Object.keys(placeholders).forEach((p) => {
+        str = str.replace(p, placeholders[p]);
+    });
+    return str;
+}
+
 const getBalance = async (id, state) => {
-	var balance = await state.db.get('SELECT balance FROM users WHERE id = ?', id);
+	var balance = await state.db.get('SELECT * FROM users WHERE id = ?', id);
     if(balance == undefined || isNaN(balance.balance)) {
         await state.db.run('INSERT INTO users (id, balance) VALUES (?, ?)', id, (await state.config.get('economy')).starting_coins);
     }
-    balance = await state.db.get('SELECT balance FROM users WHERE id = ?', id);
+    balance = await state.db.get('SELECT * FROM users WHERE id = ?', id);
 
     return balance.balance
 }
