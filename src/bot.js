@@ -2,6 +2,7 @@ const { Client } = require('discord.js')
 const chalk = require('chalk')
 const open = require('open')
 const sqlite = require('sqlite')
+const { Database } = require('sqlite3')
 const sql = require('sql-template-strings')
 const shortEmoji = require('emoji-to-short-name')
 
@@ -18,7 +19,10 @@ process.title = `WAHtson ${version}`
 console.log(`WAHtson ${version}`)
 
 config.load()
-    .then(() => sqlite.open('./database.sqlite'), { Promise })
+    .then(() => sqlite.open({
+        filename: './database.sqlite',
+        driver: Database,
+    }))
     .then(async _db => {
         db = _db
         await db.migrate()
@@ -39,7 +43,7 @@ client.once('ready', async () => {
 
     const serverId = await config.get('server_id')
 
-    guild = client.guilds.resolve(serverId)
+    guild = client.guilds.cache.find(g => g.id === serverId)
     if (!guild) {
         console.log(chalk.red('bot is not present in configured server!'))
         console.log(chalk.red('please invite it using your browser.'))
@@ -50,7 +54,7 @@ client.once('ready', async () => {
         while (true) {
             await sleep(1000)
 
-            guild = client.guilds.resolve(serverId)
+            guild = client.guilds.cache.find(g => g.id === serverId)
             if (guild) {
                 break
             }
@@ -70,7 +74,7 @@ client.on('message', async msg => {
 
         if (!commandAttempted) return
 
-        const member = msg.member || (await guild.members.resolve(msg.author))
+        const member = msg.member || (await guild.fetchMember(msg.author))
 
         if (!member) return // Not a member of the server
 
@@ -104,29 +108,29 @@ client.on('guildMemberAdd', async member => {
 client.on('raw', async packet => {
     if (!['MESSAGE_REACTION_ADD', 'MESSAGE_REACTION_REMOVE'].includes(packet.t)) return;
 
-    const channel = client.channels.resolve(packet.d.channel_id)
+    const channel = client.channels.cache.get(packet.d.channel_id)
 
     // Cached message; event will fire anyway.
     if (channel.messages.cache.has(packet.d.message_id)) return
 
-    const message = await channel.messages.resolve(packet.d.message_id)
+    const message = await channel.messages.fetch(packet.d.message_id)
     const emoji = packet.d.emoji.id ? `${packet.d.emoji.name}:${packet.d.emoji.id}` : packet.d.emoji.name
 
-    const reaction = message.reactions.get(emoji)
-    if (reaction) reaction.users.set(packet.d.user_id, client.users.resolve(packet.d.user_id))
+    const reaction = message.reactions.cache.get(emoji)
+    if (reaction) reaction.users.cache.set(packet.d.user_id, client.users.cache.get(packet.d.user_id))
 
     if (packet.t === 'MESSAGE_REACTION_ADD') {
-        client.emit('messageReactionAdd', reaction, client.users.resolve(packet.d.user_id))
+        client.emit('messageReactionAdd', reaction, client.users.cache.get(packet.d.user_id))
     } else if (packet.t === 'MESSAGE_REACTION_REMOVE') {
-        client.emit('messageReactionRemove', reaction, client.users.resolve(packet.d.user_id))
+        client.emit('messageReactionRemove', reaction, client.users.cache.get(packet.d.user_id))
     }
 })
 
 client.on('messageReactionAdd', async (reaction, user) => {
     if (!guild) return
-    if (reaction.message.guild.id !== guild.id) return
+    if (!reaction || reaction.message.guild.id !== guild.id) return
 
-    const member = await guild.members.resolve(user)
+    const member = await guild.members.fetch(user)
 
     if (await config.has('pin')) {
         await handlePossiblePin(reaction)
@@ -156,9 +160,9 @@ client.on('messageReactionAdd', async (reaction, user) => {
 
 client.on('messageReactionRemove', async (reaction, user) => {
     if (!guild) return
-    if (reaction.message.guild.id !== guild.id) return
+    if (!reaction || reaction.message.guild.id !== guild.id) return
 
-    const member = await guild.members.resolve(user)
+    const member = await guild.members.fetch(user)
 
     if (await config.has('reactions')) {
         for (const rConfig of await config.get('reactions')) {

@@ -34,12 +34,11 @@ module.exports = {
     async COPY_SOURCE_MESSAGE(source, opts) {
         const channel = opts.getChannel('to')
 
-
         channel.send({
             embed: {
                 author: {
                     name: source.message.member.displayName,
-                    icon_url: source.message.author.displayAvatarURL(),
+                    icon_url: source.message.author.displayAvatarURL,
                 },
                 image: {
                     url: (source.message.attachments.first() || {}).proxyURL,
