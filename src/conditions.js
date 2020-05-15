@@ -54,7 +54,7 @@ const timeObjToMs = (timeObj) => {
 	ms += (timeObj.hours || 0) * CONV.HOUR
 	ms += (timeObj.minutes || 0) * CONV.MINUTE
 	ms += (timeObj.seconds  || 0)* CONV.SECOND
-	ms += (timeObj.ms || 0)
+	ms += (timeObj.milliseconds || 0)
 
 	return ms
 }
