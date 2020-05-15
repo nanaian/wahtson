@@ -38,7 +38,7 @@ module.exports = {
             embed: {
                 author: {
                     name: source.message.member.displayName,
-                    icon_url: source.message.author.displayAvatarURL(),
+                    icon_url: await source.message.author.displayAvatarURL(),
                 },
                 image: {
                     url: (source.message.attachments.first() || {}).proxyURL,
