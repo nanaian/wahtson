@@ -344,6 +344,14 @@ function makeResolvable(map) {
             return +resolveKey(key)
         },
 
+        getBoolean(key) {
+            try {
+                return resolveKey(key)
+            } catch(e) {
+                return false
+            }
+        },
+
         // Resolves to a Role by name or id.
         getRole(key) {
             const roleNameOrId = resolveKey(key)

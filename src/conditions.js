@@ -21,8 +21,8 @@ module.exports = {
 
 	async REQUIRE_COINS(source, opts, state) {
 		var balance = await getBalance(source.member.id, state)
-	
-		if(opts.getText('deduct') && balance >= opts.getNumber('amount')) {
+
+		if(opts.getBoolean('deduct') && balance >= opts.getNumber('amount')) {
 			state.db.run('UPDATE users SET balance = ? WHERE id = ?', balance-opts.getNumber('amount'), source.member.id);
 		}
 
