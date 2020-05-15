@@ -134,7 +134,6 @@ usage = "daily"
     [[commands.actions]]
     type = "GIVE_COINS"
     amount = "50"
-    #items = { daily_booster_x2: 100 } adding soon
     when = { type = 'TIME_SINCE', time = { days = 1 }, count_use = false }
 
     [[commands.actions]]
