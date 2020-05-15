@@ -1,3 +1,5 @@
+const chalk = require('chalk')
+
 module.exports = {
     // Sends a message (option: 'text') to the source channel.
     async REPLY(source, opts) {
@@ -98,11 +100,32 @@ module.exports = {
 
         var placeholders = { "$item" : opts.getText('item'), "$balance" : balance, "$outstanding" : opts.getNumber('price')-balance };
 
-        if(purchase == undefined) {
+        if(purchase == undefined || opts.getBoolean("repeatable")) {
             if(balance >= opts.getNumber('price')) {
                 state.db.run('UPDATE users SET balance = ? WHERE id = ?', balance-opts.getNumber('price'), source.member.id);
                 await state.db.run('INSERT INTO purchases (userid, item) VALUES (?, ?)', source.member.id, opts.getText('item'));
                 source.channel.send(replacePlaceholders(opts.getText('text_success'), placeholders))
+
+                if (await state.config.has('purchases')) {
+            
+                    if (!source.member) return // Not a member of the server
+        
+                    console.log(chalk.cyan(`@${source.member.displayName} purchased: ${opts.getText('item')}`))
+        
+                    var purchaseConfig = (await state.config.get('purchases')).find(pch => {
+                        const [ itemName ] = pch.item.split(' ') // TODO: parse properly
+                        return itemName === opts.getText('item')
+                    })
+
+                    if(purchaseConfig) {
+                        await state.executeActionChain(purchaseConfig.actions, {
+                            message: source.message,
+                            channel: source.channel,
+                            member: source.member,
+                            command: source.command,
+                        })
+                    }
+                }
             } else {
                 source.channel.send(replacePlaceholders(opts.getText('text_poor'), placeholders))
             }

@@ -79,6 +79,7 @@ client.on('message', async msg => {
                 message: msg,
                 channel: msg.channel,
                 member: msg.member,
+                command: null,
             })
         } else {
             const member = msg.member || (await guild.fetchMember(msg.author))
@@ -94,6 +95,7 @@ client.on('message', async msg => {
                 message: msg,
                 channel: msg.channel,
                 member: member,
+                command: commandString,
             })
         }
     }
@@ -109,6 +111,7 @@ client.on('guildMemberAdd', async member => {
         message: null,
         channel: null,
         member: member,
+        command: null,
     })
 })
 
@@ -160,6 +163,7 @@ client.on('messageReactionAdd', async (reaction, user) => {
                     message: reaction.message,
                     channel: reaction.message.channel,
                     member,
+                    command: null,
                 })
             }
         }
@@ -188,6 +192,7 @@ client.on('messageReactionRemove', async (reaction, user) => {
                     message: reaction.message,
                     channel: reaction.message.channel,
                     member,
+                    command: null,
                 })
             }
         }
@@ -217,6 +222,7 @@ async function handlePossiblePin(reaction) {
                 message: reaction.message,
                 channel: reaction.message.channel,
                 member: reaction.message.member,
+                command: null,
             })
         }
     }
@@ -227,6 +233,7 @@ async function executeActionChain(actions, source) {
         previousActionSkipped: false,
         db: db,
         config: config,
+        executeActionChain: executeActionChain
     }
 
     for (let idx = 0; idx < actions.length; idx++) {
