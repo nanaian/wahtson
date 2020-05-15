@@ -3,7 +3,7 @@ const chalk = require('chalk')
 module.exports = {
     // Sends a message (option: 'text') to the source channel.
     async REPLY(source, opts) {
-        await source.channel.send(opts.getText('text'))
+        await source.channel.send(replacePlaceholdersOptions(opts.getText('text'), opts))
     },
 
     // Sends a DM (option: 'text') to the source user.
@@ -137,6 +137,11 @@ module.exports = {
     async GIVE_COINS(source, opts, state) {
         var balance = await getBalance(source.member.id, state)
         state.db.run('UPDATE users SET balance = ? WHERE id = ?', balance+opts.getNumber('amount'), source.member.id);
+
+        if(opts.getText('text')) {
+            var placeholders = { "$amount" : opts.getNumber('amount') };
+            source.channel.send(replacePlaceholders(opts.getText('text'), placeholders))
+        }
     },
 }
 

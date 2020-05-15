@@ -239,11 +239,26 @@ async function executeActionChain(actions, source) {
     for (let idx = 0; idx < actions.length; idx++) {
         const action = actions[idx]
 
+        if(action.modifiers) {
+            var modsDone = 0;
+            for(var i = 0; i < Object.keys(action.modifiers).length; i++) {
+                var mod = action.modifiers[Object.keys(action.modifiers)[i]];
+                if(await userHasItem(source.member.id, mod.item)) {
+                    for (key in mod.options) {
+                        action[key] = mod.options[key];
+                    }
+                    modsDone++
+                }
+            }
+            await modsDone == Object.keys(action.modifiers).length
+        }
+
         process.stdout.write(chalk.grey(` ${idx + 1}. ${action.type}`))
 
         if (action.when) {
             const conditions = Array.isArray(action.when) ? action.when : [action.when]
             let conditionsOk = true
+
 
             for (const condition of conditions) {
                 const conditionFn = conditionFunctions[condition.type]
@@ -421,6 +436,26 @@ function makeResolvable(map) {
     }
 }
 
+async function userHasItem(id, item) {
+    var itemResult = await db.get('SELECT * FROM purchases WHERE userid = ? AND item = ?', id, item);
+    
+    return itemResult != undefined
+}
+
 process.on('unhandledRejection', error => {
     console.error(chalk.red(`error: ${error.stack || error}`))
 })
+
+Object.defineProperty(Array.prototype, "asyncForEach", {
+    enumerable: false,
+    value: function(task){
+        return new Promise((resolve, reject) => {
+            this.forEach(function(item, index, array){
+                task(item, index, array);
+                if(Object.is(array.length - 1, index)){
+                    resolve({ status: 'finished', count: array.length })
+                }
+            });        
+        })
+    }
+});

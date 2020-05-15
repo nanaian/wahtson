@@ -127,13 +127,9 @@ item = "nothing"
 usage = "daily"
 
     [[commands.actions]]
-    type = "REPLY"
-    text = "You have claimed your 50 daily coins"
-    when = { type = 'TIME_SINCE', time = { days = 1 }, count_use = false }
-
-    [[commands.actions]]
     type = "GIVE_COINS"
     amount = "50"
+    text = "You have claimed your $amount daily coins"
     when = { type = 'TIME_SINCE', time = { days = 1 }, count_use = false }
 
     [[commands.actions]]
