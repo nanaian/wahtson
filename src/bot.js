@@ -73,22 +73,29 @@ client.on('message', async msg => {
     if (await config.has('commands')) {
         const { commandAttempted, commandString, commandConfig, args } = await parseMessage(msg)
 
-        if (!commandAttempted) return
+        if (!commandAttempted) {
+            const member = msg.member || (await guild.fetchMember(msg.author))
+            await executeActionChain(await config.get('on_message'), {
+                message: msg,
+                channel: msg.channel,
+                member: msg.member,
+            })
+        } else {
+            const member = msg.member || (await guild.fetchMember(msg.author))
 
-        const member = msg.member || (await guild.fetchMember(msg.author))
+            if (!member) return // Not a member of the server
 
-        if (!member) return // Not a member of the server
+            console.log(chalk.cyan(`@${member.displayName} issued command: ${msg.cleanContent}`))
 
-        console.log(chalk.cyan(`@${member.displayName} issued command: ${msg.cleanContent}`))
-
-        const actions = commandConfig
-            ? commandConfig.actions
-            : (await config.get('on_unknown_command'))
-        await executeActionChain(actions, {
-            message: msg,
-            channel: msg.channel,
-            member: member,
-        })
+            const actions = commandConfig
+                ? commandConfig.actions
+                : (await config.get('on_unknown_command'))
+            await executeActionChain(actions, {
+                message: msg,
+                channel: msg.channel,
+                member: member,
+            })
+        }
     }
 })
 
