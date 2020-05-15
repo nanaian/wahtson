@@ -118,11 +118,11 @@ const fileExtension = url => {
 }
 
 const getBalance = async (id, state) => {
-    var balance = await state.db.get('SELECT balance FROM users WHERE id = ?', [id]);
-    if(isNaN(balance.balance)) {
-        await state.db.get('INSERT INTO users (id, balance) VALUES (?, ?)', id, (await state.config.get('economy')).starting_coins);
+    var balance = await state.db.get('SELECT balance FROM users WHERE id = ?', id);
+    if(balance == undefined || isNaN(balance.balance)) {
+        await state.db.run('INSERT INTO users (id, balance) VALUES (?, ?)', id, (await state.config.get('economy')).starting_coins);
     }
-    balance = await state.db.get('SELECT balance FROM users WHERE id = ?', [id]);
+    balance = await state.db.get('SELECT balance FROM users WHERE id = ?', id);
 
     return balance.balance
 }

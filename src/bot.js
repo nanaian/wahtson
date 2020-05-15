@@ -218,6 +218,8 @@ async function handlePossiblePin(reaction) {
 async function executeActionChain(actions, source) {
     let state = {
         previousActionSkipped: false,
+        db: db,
+        config: config,
     }
 
     for (let idx = 0; idx < actions.length; idx++) {
