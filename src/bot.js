@@ -344,11 +344,11 @@ function makeResolvable(map) {
             return +resolveKey(key)
         },
 
-        getBoolean(key) {
+        getBoolean(key, defaultVal = false) {
             try {
                 return resolveKey(key)
             } catch(e) {
-                return false
+                return defaultVal
             }
         },
 
