@@ -14,7 +14,7 @@ module.exports = {
     // If the member already has the role, nothing happens.
     // If the named role does not exist, an error is thrown.
     async GRANT_ROLE(source, opts) {
-        await source.member.addRole(opts.getRole('role'))
+        await source.member.roles.add(opts.getRole('role'))
     },
 
     // Revokes a role (option: 'role') from the source member.
@@ -22,7 +22,7 @@ module.exports = {
     // If the member doesn't have the role, nothing happens.
     // If the named role does not exist, an error is thrown.
     async REVOKE_ROLE(source, opts) {
-        await source.member.removeRole(opts.getRole('role'))
+        await source.member.roles.remove(opts.getRole('role'))
     },
 
     // Deletes the source message (ie. the message with the command in it).
@@ -34,11 +34,12 @@ module.exports = {
     async COPY_SOURCE_MESSAGE(source, opts) {
         const channel = opts.getChannel('to')
 
+
         channel.send({
             embed: {
                 author: {
                     name: source.message.member.displayName,
-                    icon_url: source.message.author.displayAvatarURL,
+                    icon_url: source.message.author.displayAvatarURL(),
                 },
                 image: {
                     url: (source.message.attachments.first() || {}).proxyURL,
