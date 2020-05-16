@@ -54,8 +54,9 @@ const checkCooldown = async (userid, cooldownid, state, count_use) => {
 }
 
 const handlePlaceholders = (str, objs = {}) => {
-    if (objs.args) str = replaceArgPlaceholders(str, objs.args)
-    if(objs.opts) str = replaceOptsPlaceholders(str, objs.opts);
+    if (objs.source.args) str = replaceArgPlaceholders(str, objs.source.args)
+    if (objs.source) str = replaceEventPlaceholders(str, objs.source)
+    if (objs.opts) str = replaceOptsPlaceholders(str, objs.opts)
     if (objs.placeholders) str = replacePlaceholders(str, objs.placeholders)
     return str
 }
@@ -75,13 +76,23 @@ const replaceArgPlaceholders = (str, args) => {
     }
     return str
 }
-const replaceOptsPlaceholders = (str, opts) => {
-    var keys = opts.getKeys();
+const replaceEventPlaceholders = (str, source) => {
+    var keys = Object.keys(source)
     keys.forEach(key => {
-        console.log(key);
+        if (key == 'args') return
+        const re = new RegExp(escapeRegexSpecialChars('$:' + key), 'g')
+        str = str.replace(re, source[key])
+    })
+    return str
+}
+
+const replaceOptsPlaceholders = (str, opts) => {
+    var keys = opts.getKeys()
+    keys.forEach(key => {
+        if (opts.getString(key) == '[Object object]') return
         const re = new RegExp(escapeRegexSpecialChars('$_' + key), 'g')
-        str = str.replace(re, opts.getText(key))
-    });
+        str = str.replace(re, opts.getString(key))
+    })
     return str
 }
 
@@ -120,7 +131,7 @@ const getBalance = async (id, state) => {
     return balance.balance
 }
 
-async function userHasItem(id, item) {
+async function userHasItem(id, item, db) {
     const itemResult = await db.get(
         'SELECT * FROM purchases WHERE userid = ? AND item = ?',
         id,

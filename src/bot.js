@@ -263,7 +263,7 @@ async function executeActionChain(actions, source) {
             for (let i = 0; i < Object.keys(action.modifiers).length; i++) {
                 let mod = action.modifiers[Object.keys(action.modifiers)[i]]
 
-                if (await userHasItem(source.member.id, mod.item)) {
+                if (await userHasItem(source.member.id, mod.item, db)) {
                     for (key in mod.options) {
                         action[key] = mod.options[key]
                     }
@@ -323,6 +323,7 @@ async function executeActionChain(actions, source) {
 
         await fn(source, makeResolvable(action), state).catch(err => {
             console.error(chalk.red(` error: ${err}`))
+            console.error(err.stack)
         })
 
         state.previousActionSkipped = false
@@ -369,9 +370,14 @@ function makeResolvable(map) {
     }
 
     return {
-
         getKeys() {
             return Object.keys(map)
+        },
+
+        getString(key) {
+            const value = safeToString(resolveKey(key))
+
+            return value
         },
 
         // Resolves to a string intended as message content.
@@ -454,6 +460,16 @@ function makeResolvable(map) {
 
             return emoji.name
         },
+    }
+}
+function safeToString(x) {
+    switch (typeof x) {
+        case 'object':
+            return '[Object object]'
+        case 'function':
+            return '[Function function]'
+        default:
+            return x + ''
     }
 }
 

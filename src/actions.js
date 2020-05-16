@@ -4,7 +4,9 @@ const { handlePlaceholders, attachmentType, escapeMarkdown, getBalance } = requi
 module.exports = {
     // Sends a message (option: 'text') to the source channel.
     async REPLY(source, opts) {
-        await source.channel.send(handlePlaceholders(opts.getText('text'), { args: source.args, opts: opts }))
+        await source.channel.send(
+            handlePlaceholders(opts.getText('text'), { source: source, opts: opts }),
+        )
     },
 
     // Sends a DM (option: 'text') to the source user.
@@ -99,7 +101,11 @@ module.exports = {
         const balance = await getBalance(source.member.id, state)
         const placeholders = { $balance: balance }
         source.channel.send(
-            handlePlaceholders(opts.getText('text'), { placeholders: placeholders, args: source.args, opts: opts }),
+            handlePlaceholders(opts.getText('text'), {
+                placeholders: placeholders,
+                source: source,
+                opts: opts,
+            }),
         )
     },
 
@@ -131,7 +137,9 @@ module.exports = {
                 )
                 source.channel.send(
                     handlePlaceholders(opts.getText('text_success'), {
-                        placeholders: placeholders, args: source.args, opts: opts,
+                        placeholders: placeholders,
+                        source: source,
+                        opts: opts,
                     }),
                 )
 
@@ -160,12 +168,20 @@ module.exports = {
                 }
             } else {
                 source.channel.send(
-                    handlePlaceholders(opts.getText('text_poor'), { placeholders: placeholders, args: source.args, opts: opts }),
+                    handlePlaceholders(opts.getText('text_poor'), {
+                        placeholders: placeholders,
+                        source: source,
+                        opts: opts,
+                    }),
                 )
             }
         } else {
             source.channel.send(
-                handlePlaceholders(opts.getText('text_duplicate'), { placeholders: placeholders, args: source.args, opts: opts }),
+                handlePlaceholders(opts.getText('text_duplicate'), {
+                    placeholders: placeholders,
+                    source: source,
+                    opts: opts,
+                }),
             )
         }
     },
@@ -181,7 +197,11 @@ module.exports = {
         if (opts.getText('text')) {
             const placeholders = { $amount: opts.getNumber('amount') }
             source.channel.send(
-                handlePlaceholders(opts.getText('text'), { placeholders: placeholders, args: source.args, opts: opts }),
+                handlePlaceholders(opts.getText('text'), {
+                    placeholders: placeholders,
+                    source: source,
+                    opts: opts,
+                }),
             )
         }
     },
