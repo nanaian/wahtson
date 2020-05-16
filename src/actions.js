@@ -118,7 +118,6 @@ module.exports = {
         const balance = await getBalance(source.member.id, state)
 
         const placeholders = {
-            $item: opts.getText('item'),
             $balance: balance,
             $outstanding: opts.getNumber('price') - balance,
         }
@@ -195,10 +194,8 @@ module.exports = {
         )
 
         if (opts.getText('text')) {
-            const placeholders = { $amount: opts.getNumber('amount') }
             source.channel.send(
                 handlePlaceholders(opts.getText('text'), {
-                    placeholders: placeholders,
                     source: source,
                     opts: opts,
                 }),
