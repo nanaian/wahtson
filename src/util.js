@@ -53,11 +53,35 @@ const checkCooldown = async (userid, cooldownid, state, count_use) => {
     }
 }
 
+const handlePlaceholders = (str, objs = {}) => {
+    if (objs.args) str = replaceArgPlaceholders(str, objs.args)
+    if(objs.opts) str = replaceOptsPlaceholders(str, objs.opts);
+    if (objs.placeholders) str = replacePlaceholders(str, objs.placeholders)
+    return str
+}
+
 const replacePlaceholders = (str, placeholders) => {
     Object.keys(placeholders).forEach(p => {
         const re = new RegExp(escapeRegexSpecialChars(p), 'g')
         str = str.replace(re, placeholders[p])
     })
+    return str
+}
+
+const replaceArgPlaceholders = (str, args) => {
+    for (var i = 0; i < args.length; i++) {
+        const re = new RegExp(escapeRegexSpecialChars('$arg' + i), 'g')
+        str = str.replace(re, args[i])
+    }
+    return str
+}
+const replaceOptsPlaceholders = (str, opts) => {
+    var keys = opts.getKeys();
+    keys.forEach(key => {
+        console.log(key);
+        const re = new RegExp(escapeRegexSpecialChars('$_' + key), 'g')
+        str = str.replace(re, opts.getText(key))
+    });
     return str
 }
 
@@ -110,7 +134,7 @@ module.exports = {
     timeObjToMs,
     checkCooldown,
 
-    replacePlaceholders,
+    handlePlaceholders,
     escapeMarkdown,
     attachmentType,
 

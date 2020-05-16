@@ -84,6 +84,7 @@ client.on('message', async msg => {
                 channel: msg.channel,
                 member: msg.member,
                 command: null,
+                args: [],
             })
         } else {
             const member = msg.member || (await guild.fetchMember(msg.author))
@@ -100,6 +101,9 @@ client.on('message', async msg => {
                 channel: msg.channel,
                 member: member,
                 command: commandString,
+                args: args.filter(el => {
+                    return el != ''
+                }),
             })
         }
     }
@@ -116,6 +120,7 @@ client.on('guildMemberAdd', async member => {
         channel: null,
         member: member,
         command: null,
+        args: [],
     })
 })
 
@@ -171,6 +176,7 @@ client.on('messageReactionAdd', async (reaction, user) => {
                     channel: reaction.message.channel,
                     member,
                     command: null,
+                    args: [],
                 })
             }
         }
@@ -200,6 +206,7 @@ client.on('messageReactionRemove', async (reaction, user) => {
                     channel: reaction.message.channel,
                     member,
                     command: null,
+                    args: [],
                 })
             }
         }
@@ -235,6 +242,7 @@ async function handlePossiblePin(reaction) {
                 channel: reaction.message.channel,
                 member: reaction.message.member,
                 command: null,
+                args: [],
             })
         }
     }
@@ -361,6 +369,11 @@ function makeResolvable(map) {
     }
 
     return {
+
+        getKeys() {
+            return Object.keys(map)
+        },
+
         // Resolves to a string intended as message content.
         getText(key) {
             const value = resolveKey(key)

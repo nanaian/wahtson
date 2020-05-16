@@ -1,3 +1,4 @@
+const chalk = require('chalk')
 const { getBalance, checkCooldown, timeObjToMs } = require('./util.js')
 
 module.exports = {
@@ -46,5 +47,11 @@ module.exports = {
         )
 
         return Date.now() - lastUsed > timeRequired
+    },
+
+    async HAS_ARGS(source, opts, state) {
+        console.log(source.args)
+        console.log(opts.getNumber('length'))
+        return source.args.length >= (await opts.getNumber('length'))
     },
 }

@@ -1,10 +1,10 @@
 const chalk = require('chalk')
-const { replacePlaceholders, attachmentType, escapeMarkdown, getBalance } = require('./util.js')
+const { handlePlaceholders, attachmentType, escapeMarkdown, getBalance } = require('./util.js')
 
 module.exports = {
     // Sends a message (option: 'text') to the source channel.
     async REPLY(source, opts) {
-        await source.channel.send(replacePlaceholders(opts.getText('text'), opts))
+        await source.channel.send(handlePlaceholders(opts.getText('text'), { args: source.args, opts: opts }))
     },
 
     // Sends a DM (option: 'text') to the source user.
@@ -98,7 +98,9 @@ module.exports = {
     async GET_BALANCE(source, opts, state) {
         const balance = await getBalance(source.member.id, state)
         const placeholders = { $balance: balance }
-        source.channel.send(replacePlaceholders(opts.getText('text'), placeholders))
+        source.channel.send(
+            handlePlaceholders(opts.getText('text'), { placeholders: placeholders, args: source.args, opts: opts }),
+        )
     },
 
     async PURCHASE_ITEM(source, opts, state) {
@@ -127,7 +129,11 @@ module.exports = {
                     source.member.id,
                     opts.getText('item'),
                 )
-                source.channel.send(replacePlaceholders(opts.getText('text_success'), placeholders))
+                source.channel.send(
+                    handlePlaceholders(opts.getText('text_success'), {
+                        placeholders: placeholders, args: source.args, opts: opts,
+                    }),
+                )
 
                 if (await state.config.has('purchases')) {
                     if (!source.member) return // Not a member of the server
@@ -153,10 +159,14 @@ module.exports = {
                     }
                 }
             } else {
-                source.channel.send(replacePlaceholders(opts.getText('text_poor'), placeholders))
+                source.channel.send(
+                    handlePlaceholders(opts.getText('text_poor'), { placeholders: placeholders, args: source.args, opts: opts }),
+                )
             }
         } else {
-            source.channel.send(replacePlaceholders(opts.getText('text_duplicate'), placeholders))
+            source.channel.send(
+                handlePlaceholders(opts.getText('text_duplicate'), { placeholders: placeholders, args: source.args, opts: opts }),
+            )
         }
     },
 
@@ -170,7 +180,9 @@ module.exports = {
 
         if (opts.getText('text')) {
             const placeholders = { $amount: opts.getNumber('amount') }
-            source.channel.send(replacePlaceholders(opts.getText('text'), placeholders))
+            source.channel.send(
+                handlePlaceholders(opts.getText('text'), { placeholders: placeholders, args: source.args, opts: opts }),
+            )
         }
     },
 }
