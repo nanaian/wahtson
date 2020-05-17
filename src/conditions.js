@@ -100,6 +100,6 @@ module.exports = {
             return role != undefined
         }
         // Type is not handled
-            throw `type ${opts.getText('value')} is not supported`
+        throw `type ${opts.getText('value')} is not supported`
     },
 }
