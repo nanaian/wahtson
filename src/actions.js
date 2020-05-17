@@ -129,11 +129,13 @@ module.exports = {
                     balance - opts.getNumber('price'),
                     source.member.id,
                 )
-                await state.db.run(
-                    'INSERT INTO purchases (userid, item) VALUES (?, ?)',
-                    source.member.id,
-                    opts.getText('item'),
-                )
+                if(purchase == undefined) {
+                    await state.db.run(
+                        'INSERT INTO purchases (userid, item) VALUES (?, ?)',
+                        source.member.id,
+                        opts.getText('item'),
+                    )
+                }
                 source.channel.send(
                     handlePlaceholders(opts.getText('text_success'), {
                         placeholders: placeholders,

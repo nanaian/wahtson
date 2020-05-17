@@ -35,6 +35,14 @@ module.exports = {
 
         return balance >= opts.getNumber('amount')
     },
+    async HAS_ITEM(source, opts, state) {
+        const purchase = await state.db.get(
+            'SELECT * FROM purchases WHERE userid = ? AND item = ?',
+            source.member.id,
+            opts.getText('item'),
+        )
+        return purchase != undefined
+    },
 
     async TIME_SINCE(source, opts, state) {
         let timeRequired = timeObjToMs(opts.getText('time'))
