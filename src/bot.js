@@ -373,7 +373,7 @@ function makeResolvable(map) {
         },
 
         has(key) {
-            return map.hasOwnProperty(key);
+            return map.hasOwnProperty(key)
         },
 
         getString(key) {
