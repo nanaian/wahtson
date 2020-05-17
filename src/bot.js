@@ -324,7 +324,6 @@ async function executeActionChain(actions, source) {
 
         await fn(source, makeResolvable(action), state).catch(err => {
             console.error(chalk.red(` error: ${err}`))
-            console.error(err.stack)
         })
 
         state.previousActionSkipped = false
