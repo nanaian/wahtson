@@ -376,9 +376,7 @@ function makeResolvable(map) {
         },
 
         getString(key) {
-            const value = safeToString(resolveKey(key))
-
-            return value
+            return safeToString(resolveKey(key))
         },
 
         // Resolves to a string intended as message content.
