@@ -129,7 +129,7 @@ module.exports = {
                     balance - opts.getNumber('price'),
                     source.member.id,
                 )
-                if(purchase == undefined) {
+                if (purchase == undefined) {
                     await state.db.run(
                         'INSERT INTO purchases (userid, item) VALUES (?, ?)',
                         source.member.id,
