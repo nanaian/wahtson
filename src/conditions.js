@@ -100,7 +100,7 @@ module.exports = {
             return role != undefined
         }
         if (opts.getText('value') == 'Emoji') {
-            strToEmoji(target);
+            strToEmoji(target)
             return emoji != undefined
         }
         // Type is not handled
