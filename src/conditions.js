@@ -58,8 +58,15 @@ module.exports = {
     },
 
     async HAS_ARGS(source, opts, state) {
-        console.log(source.args)
-        console.log(opts.getNumber('length'))
         return source.args.length >= (await opts.getNumber('length'))
+    },
+    async ARG_EQUALS(source, opts, state) {
+        var target = source.args[opts.getNumber("index")];
+        return (target != undefined && target == opts.getText("value"))
+    },
+    async ARG_TYPE(source, opts, state) {
+        var target = source.args[opts.getNumber("index")];
+        
+        return (target != undefined && false)
     },
 }
