@@ -372,6 +372,10 @@ function makeResolvable(map) {
             return Object.keys(map)
         },
 
+        has(key) {
+            return map.hasOwnProperty(key);
+        },
+
         getString(key) {
             return safeToString(resolveKey(key))
         },
