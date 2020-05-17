@@ -7,7 +7,7 @@ const sql = require('sql-template-strings')
 const shortEmoji = require('emoji-to-short-name')
 
 const config = require('./config.js')
-const { sleep, userHasItem } = require('./util.js')
+const { handlePlaceholders, sleep, userHasItem } = require('./util.js')
 const actionFunctions = require('./actions.js')
 const conditionFunctions = require('./conditions.js')
 const { version } = require('../package.json')
@@ -257,7 +257,7 @@ async function executeActionChain(actions, source) {
     }
 
     for (let idx = 0; idx < actions.length; idx++) {
-        var action = JSON.parse(JSON.stringify(actions[idx]))
+        let action = JSON.parse(JSON.stringify(actions[idx]))
 
         if (action.modifiers) {
             for (let i = 0; i < Object.keys(action.modifiers).length; i++) {
@@ -492,42 +492,6 @@ const placeholdersInOpts = (opts, source) => {
     }
     return newOpts
 }
-
-const handlePlaceholders = (str, objs = {}) => {
-    if (objs.source.args) str = replaceArgPlaceholders(str, objs.source.args)
-    if (objs.source) str = replaceEventPlaceholders(str, objs.source)
-    if (objs.opts) str = replaceOptsPlaceholders(str, objs.opts)
-    return str
-}
-
-const replaceArgPlaceholders = (str, args) => {
-    for (let i = 0; i < args.length; i++) {
-        const re = new RegExp(escapeRegexSpecialChars('$arg' + i), 'g')
-        str = str.replace(re, args[i])
-    }
-    return str
-}
-const replaceEventPlaceholders = (str, source) => {
-    var keys = Object.keys(source)
-    keys.forEach(key => {
-        if (key == 'args') return
-        const re = new RegExp(escapeRegexSpecialChars('$:' + key), 'g')
-        str = str.replace(re, source[key])
-    })
-    return str
-}
-
-const replaceOptsPlaceholders = (str, opts) => {
-    var keys = Object.keys(opts)
-    keys.forEach(key => {
-        if (safeToString(opts[key]) == '[Object object]') return
-        const re = new RegExp(escapeRegexSpecialChars('$_' + key), 'g')
-        str = str.replace(re, safeToString(opts[key]))
-    })
-    return str
-}
-
-const escapeRegexSpecialChars = str => str.replace(/([.?*+^$[\]\\(){}|-])/g, '\\$1')
 
 process.on('unhandledRejection', error => {
     console.error(chalk.red(`error: ${error.stack || error}`))
