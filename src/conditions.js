@@ -120,12 +120,32 @@ module.exports = {
             } catch (e) {
                 timeLimit = 15000
             }
+            if (
+                source.message.reactions.cache.find(
+                    reaction =>
+                        reaction.emoji.name == emoji &&
+                        reaction.users.cache.some(user => user.id === source.member.id),
+                )
+            ) {
+                resolve(true)
+            }
             console.log(timeLimit)
+            if (timeLimit == 0) {
+                resolve(
+                    source.message.reactions.cache.find(
+                        reaction =>
+                            reaction.emoji.name == emoji &&
+                            reaction.users.cache.some(user => user.id === source.member.id),
+                    ),
+                )
+            }
             const collector = source.message.createReactionCollector(filter, { time: timeLimit })
             collector.on('collect', r => {
                 resolve(true)
             })
-            collector.on('end', collected => resolve(false))
+            collector.on('end', collected => {
+                if (collected.size == 0) resolve(false)
+            })
         })
     },
 }
