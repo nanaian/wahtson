@@ -61,12 +61,12 @@ module.exports = {
         return source.args.length >= (await opts.getNumber('length'))
     },
     async ARG_EQUALS(source, opts, state) {
-        var target = source.args[opts.getNumber("index")];
-        return (target != undefined && target == opts.getText("value"))
+        var target = source.args[opts.getNumber('index')]
+        return target != undefined && target == opts.getText('value')
     },
     async ARG_TYPE(source, opts, state) {
-        var target = source.args[opts.getNumber("index")];
-        
-        return (target != undefined && false)
+        var target = source.args[opts.getNumber('index')]
+
+        return target != undefined && false
     },
 }
