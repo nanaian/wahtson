@@ -101,9 +101,7 @@ client.on('message', async msg => {
                 channel: msg.channel,
                 member: member,
                 command: commandString,
-                args: args.filter(el => {
-                    return el != ''
-                }),
+                args: args.filter(el => el != ''),
             })
         }
     }
