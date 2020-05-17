@@ -463,6 +463,7 @@ function makeResolvable(map) {
         },
     }
 }
+
 function safeToString(x) {
     switch (typeof x) {
         case 'object':
@@ -475,7 +476,7 @@ function safeToString(x) {
 }
 
 const placeholdersInOpts = (opts, source) => {
-    var newOpts = opts
+    const newOpts = opts
     for (key in opts) {
         if (typeof opts[key] == 'string') {
             newOpts[key] = handlePlaceholders(opts[key], { opts: opts, source: source })
