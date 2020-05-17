@@ -375,9 +375,7 @@ function makeResolvable(map) {
         },
 
         getString(key) {
-            const value = safeToString(resolveKey(key))
-
-            return value
+            return safeToString(resolveKey(key))
         },
 
         // Resolves to a string intended as message content.
@@ -390,7 +388,7 @@ function makeResolvable(map) {
         },
 
         getNumber(key) {
-            if(isNaN(+resolveKey(key))) throw `'${key}' is not a number`
+            if (isNaN(+resolveKey(key))) throw `'${key}' is not a number`
             return +resolveKey(key)
         },
 
@@ -503,7 +501,7 @@ const handlePlaceholders = (str, objs = {}) => {
 }
 
 const replaceArgPlaceholders = (str, args) => {
-    for (var i = 0; i < args.length; i++) {
+    for (let i = 0; i < args.length; i++) {
         const re = new RegExp(escapeRegexSpecialChars('$arg' + i), 'g')
         str = str.replace(re, args[i])
     }
