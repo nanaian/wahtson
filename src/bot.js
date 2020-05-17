@@ -391,7 +391,7 @@ function makeResolvable(map) {
         },
 
         getNumber(key) {
-            if(isNaN(+resolveKey(key))) throw `'${key}' is not a number`
+            if (isNaN(+resolveKey(key))) throw `'${key}' is not a number`
             return +resolveKey(key)
         },
 
