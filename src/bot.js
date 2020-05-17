@@ -257,7 +257,7 @@ async function executeActionChain(actions, source) {
     }
 
     for (let idx = 0; idx < actions.length; idx++) {
-        const action = actions[idx]
+        var action = JSON.parse(JSON.stringify(actions[idx]))
 
         if (action.modifiers) {
             for (let i = 0; i < Object.keys(action.modifiers).length; i++) {
@@ -270,6 +270,7 @@ async function executeActionChain(actions, source) {
                 }
             }
         }
+        action = placeholdersInOpts(action, source)
 
         process.stdout.write(chalk.grey(` ${idx + 1}. ${action.type}`))
 
@@ -472,6 +473,62 @@ function safeToString(x) {
             return x + ''
     }
 }
+
+const placeholdersInOpts = (opts, source) => {
+    var newOpts = opts
+    for (key in opts) {
+        if (typeof opts[key] == 'string') {
+            newOpts[key] = handlePlaceholders(opts[key], { opts: opts, source: source })
+        }
+        if (typeof opts[key] == 'number') {
+            newOpts[key] = Number(
+                handlePlaceholders(opts[key].toString(), { opts: opts, source: source }),
+            )
+        }
+        if (typeof opts[key] == 'object') {
+            newOpts[key] = JSON.parse(
+                placeholdersInOpts(JSON.stringify(opts[key]), { opts: opts, source: source }),
+            )
+        }
+    }
+    return newOpts
+}
+
+const handlePlaceholders = (str, objs = {}) => {
+    if (objs.source.args) str = replaceArgPlaceholders(str, objs.source.args)
+    if (objs.source) str = replaceEventPlaceholders(str, objs.source)
+    if (objs.opts) str = replaceOptsPlaceholders(str, objs.opts)
+    return str
+}
+
+const replaceArgPlaceholders = (str, args) => {
+    for (var i = 0; i < args.length; i++) {
+        const re = new RegExp(escapeRegexSpecialChars('$arg' + i), 'g')
+        str = str.replace(re, args[i])
+    }
+    return str
+}
+const replaceEventPlaceholders = (str, source) => {
+    var keys = Object.keys(source)
+    keys.forEach(key => {
+        if (key == 'args') return
+        const re = new RegExp(escapeRegexSpecialChars('$:' + key), 'g')
+        str = str.replace(re, source[key])
+    })
+    return str
+}
+
+const replaceOptsPlaceholders = (str, opts) => {
+    var keys = Object.keys(opts)
+    keys.forEach(key => {
+        if (safeToString(opts[key]) == '[Object object]') return
+        const re = new RegExp(escapeRegexSpecialChars('$_' + key), 'g')
+        str = str.replace(re, safeToString(opts[key]))
+    })
+    return str
+}
+
+const escapeRegexSpecialChars = str => str.replace(/([.?*+^$[\]\\(){}|-])/g, '\\$1')
 
 process.on('unhandledRejection', error => {
     console.error(chalk.red(`error: ${error.stack || error}`))

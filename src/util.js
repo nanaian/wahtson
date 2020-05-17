@@ -53,50 +53,6 @@ const checkCooldown = async (userid, cooldownid, state, count_use) => {
     }
 }
 
-const handlePlaceholders = (str, objs = {}) => {
-    if (objs.source.args) str = replaceArgPlaceholders(str, objs.source.args)
-    if (objs.source) str = replaceEventPlaceholders(str, objs.source)
-    if (objs.opts) str = replaceOptsPlaceholders(str, objs.opts)
-    if (objs.placeholders) str = replacePlaceholders(str, objs.placeholders)
-    return str
-}
-
-const replacePlaceholders = (str, placeholders) => {
-    Object.keys(placeholders).forEach(p => {
-        const re = new RegExp(escapeRegexSpecialChars(p), 'g')
-        str = str.replace(re, placeholders[p])
-    })
-    return str
-}
-
-const replaceArgPlaceholders = (str, args) => {
-    for (var i = 0; i < args.length; i++) {
-        const re = new RegExp(escapeRegexSpecialChars('$arg' + i), 'g')
-        str = str.replace(re, args[i])
-    }
-    return str
-}
-const replaceEventPlaceholders = (str, source) => {
-    var keys = Object.keys(source)
-    keys.forEach(key => {
-        if (key == 'args') return
-        const re = new RegExp(escapeRegexSpecialChars('$:' + key), 'g')
-        str = str.replace(re, source[key])
-    })
-    return str
-}
-
-const replaceOptsPlaceholders = (str, opts) => {
-    var keys = opts.getKeys()
-    keys.forEach(key => {
-        if (opts.getString(key) == '[Object object]') return
-        const re = new RegExp(escapeRegexSpecialChars('$_' + key), 'g')
-        str = str.replace(re, opts.getString(key))
-    })
-    return str
-}
-
-const escapeRegexSpecialChars = str => str.replace(/([.?*+^$[\]\\(){}|-])/g, '\\$1')
 const escapeMarkdown = s => s.replace(/([\[\]\(\)])/g, '\\$&')
 
 const attachmentType = a =>
@@ -140,12 +96,21 @@ async function userHasItem(id, item, db) {
     return itemResult != undefined
 }
 
+const replacePlaceholders = (str, placeholders) => {
+    Object.keys(placeholders).forEach(p => {
+        const re = new RegExp(escapeRegexSpecialChars(p), 'g')
+        str = str.replace(re, placeholders[p])
+    })
+    return str
+}
+const escapeRegexSpecialChars = str => str.replace(/([.?*+^$[\]\\(){}|-])/g, '\\$1')
+
 module.exports = {
     sleep,
     timeObjToMs,
     checkCooldown,
 
-    handlePlaceholders,
+    replacePlaceholders,
     escapeMarkdown,
     attachmentType,
 

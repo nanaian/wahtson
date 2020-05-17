@@ -61,12 +61,48 @@ module.exports = {
         return source.args.length >= (await opts.getNumber('length'))
     },
     async ARG_EQUALS(source, opts, state) {
-        var target = source.args[opts.getNumber("index")];
-        return (target != undefined && target == opts.getText("value"))
+        var target = source.args[opts.getNumber('index')]
+        return target != undefined && target == opts.getText('value')
     },
     async ARG_TYPE(source, opts, state) {
-        var target = source.args[opts.getNumber("index")];
-        
-        return (target != undefined && false)
+        var target = source.args[opts.getNumber('index')]
+
+        const guild = source.member.guild
+
+        if (opts.getText('value') == 'String') {
+            return true
+        }
+        if (opts.getText('value') == 'Number') {
+            return !isNaN(Number(target))
+        }
+        if (opts.getText('value') == 'Channel') {
+            let channel
+            if (target.startsWith('<#')) {
+                const channelId = target.substr(2).slice(0, -1)
+                channel = guild.channels.cache.find(c => c.id === channelId)
+            }
+            return channel != undefined
+        }
+        if (opts.getText('value') == 'Member') {
+            let member
+            if (target.startsWith('<@!')) {
+                const memberId = target.substr(3).slice(0, -1)
+                member = guild.members.cache.find(m => m.id === memberId)
+            }
+            return member != undefined
+        }
+        if (opts.getText('value') == 'Role') {
+            let role
+            if (target.startsWith('<@&')) {
+                const roleId = target.substr(3).slice(0, -1)
+                role = guild.roles.cache.find(r => r.id === roleId)
+            }
+            return role != undefined
+        }
+        if (opts.getText('value') == 'Emoji') {
+            // Alex please help with this one
+        }
+        // Type is not handled
+        return false
     },
 }

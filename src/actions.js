@@ -1,12 +1,10 @@
 const chalk = require('chalk')
-const { handlePlaceholders, attachmentType, escapeMarkdown, getBalance } = require('./util.js')
+const { replacePlaceholders, attachmentType, escapeMarkdown, getBalance } = require('./util.js')
 
 module.exports = {
     // Sends a message (option: 'text') to the source channel.
     async REPLY(source, opts) {
-        await source.channel.send(
-            handlePlaceholders(opts.getText('text'), { source: source, opts: opts }),
-        )
+        await source.channel.send(opts.getText('text'))
     },
 
     // Sends a DM (option: 'text') to the source user.
@@ -100,13 +98,7 @@ module.exports = {
     async GET_BALANCE(source, opts, state) {
         const balance = await getBalance(source.member.id, state)
         const placeholders = { $balance: balance }
-        source.channel.send(
-            handlePlaceholders(opts.getText('text'), {
-                placeholders: placeholders,
-                source: source,
-                opts: opts,
-            }),
-        )
+        source.channel.send(replacePlaceholders(opts.getText('text'), placeholders))
     },
 
     async PURCHASE_ITEM(source, opts, state) {
@@ -136,13 +128,7 @@ module.exports = {
                         opts.getText('item'),
                     )
                 }
-                source.channel.send(
-                    handlePlaceholders(opts.getText('text_success'), {
-                        placeholders: placeholders,
-                        source: source,
-                        opts: opts,
-                    }),
-                )
+                source.channel.send(replacePlaceholders(opts.getText('text_success'), placeholders))
 
                 if (await state.config.has('purchases')) {
                     if (!source.member) return // Not a member of the server
@@ -168,27 +154,16 @@ module.exports = {
                     }
                 }
             } else {
-                source.channel.send(
-                    handlePlaceholders(opts.getText('text_poor'), {
-                        placeholders: placeholders,
-                        source: source,
-                        opts: opts,
-                    }),
-                )
+                source.channel.send(replacePlaceholders(opts.getText('text_poor'), placeholders))
             }
         } else {
-            source.channel.send(
-                handlePlaceholders(opts.getText('text_duplicate'), {
-                    placeholders: placeholders,
-                    source: source,
-                    opts: opts,
-                }),
-            )
+            source.channel.send(replacePlaceholders(opts.getText('text_duplicate'), placeholders))
         }
     },
 
     async GIVE_COINS(source, opts, state) {
         const balance = await getBalance(source.member.id, state)
+        const placeholders = { $balance: balance }
         state.db.run(
             'UPDATE users SET balance = ? WHERE id = ?',
             balance + opts.getNumber('amount'),
@@ -196,12 +171,7 @@ module.exports = {
         )
 
         if (opts.getText('text')) {
-            source.channel.send(
-                handlePlaceholders(opts.getText('text'), {
-                    source: source,
-                    opts: opts,
-                }),
-            )
+            source.channel.send(opts.getText('text'), placeholders)
         }
     },
 }
