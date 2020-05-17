@@ -7,7 +7,7 @@ const sql = require('sql-template-strings')
 const shortEmoji = require('emoji-to-short-name')
 
 const config = require('./config.js')
-const { handlePlaceholders, sleep, userHasItem } = require('./util.js')
+const { safeToString, handlePlaceholders, sleep, userHasItem } = require('./util.js')
 const actionFunctions = require('./actions.js')
 const conditionFunctions = require('./conditions.js')
 const { version } = require('../package.json')
@@ -457,17 +457,6 @@ function makeResolvable(map) {
 
             return emoji.name
         },
-    }
-}
-
-function safeToString(x) {
-    switch (typeof x) {
-        case 'object':
-            return '[Object object]'
-        case 'function':
-            return '[Function function]'
-        default:
-            return x + ''
     }
 }
 

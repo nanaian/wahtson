@@ -139,11 +139,24 @@ const replacePlaceholders = (str, placeholders) => {
 }
 const escapeRegexSpecialChars = str => str.replace(/([.?*+^$[\]\\(){}|-])/g, '\\$1')
 
+
+function safeToString(x) {
+    switch (typeof x) {
+        case 'object':
+            return '[Object object]'
+        case 'function':
+            return '[Function function]'
+        default:
+            return x + ''
+    }
+}
+
 module.exports = {
     sleep,
     timeObjToMs,
     checkCooldown,
 
+    safeToString,
     handlePlaceholders,
     replacePlaceholders,
     escapeMarkdown,
