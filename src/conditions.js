@@ -106,4 +106,26 @@ module.exports = {
         // Type is not handled
         throw `type ${opts.getText('value')} is not supported`
     },
+    async WAIT_FOR_REACTION(source, opts, state) {
+        const emoji = strToEmoji(opts.getText('emoji'))
+        if (opts.getBoolean('prompt')) {
+            source.message.react(emoji)
+        }
+        const filter = (reaction, user) =>
+            reaction.emoji.name == emoji && user.id === source.member.id
+        return new Promise(resolve => {
+            let timeLimit
+            try {
+                timeLimit = timeObjToMs(opts.getText('time'))
+            } catch (e) {
+                timeLimit = 15000
+            }
+            console.log(timeLimit)
+            const collector = source.message.createReactionCollector(filter, { time: timeLimit })
+            collector.on('collect', r => {
+                resolve(true)
+            })
+            collector.on('end', collected => resolve(false))
+        })
+    },
 }
