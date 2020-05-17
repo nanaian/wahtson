@@ -99,9 +99,6 @@ module.exports = {
             }
             return role != undefined
         }
-        if (opts.getText('value') == 'Emoji') {
-            // Alex please help with this one
-        }
         // Type is not handled
         return false
     },
