@@ -139,7 +139,6 @@ const replacePlaceholders = (str, placeholders) => {
 }
 const escapeRegexSpecialChars = str => str.replace(/([.?*+^$[\]\\(){}|-])/g, '\\$1')
 
-
 function safeToString(x) {
     switch (typeof x) {
         case 'object':

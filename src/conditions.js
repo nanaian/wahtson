@@ -105,9 +105,9 @@ module.exports = {
             if (target.match(re)) {
                 emoji = target
             }
-            if(target.match(/(^(\<\:)[a-z0-9]+(\:)[0-9]+(\>)$)/gi)) {
+            if (target.match(/(^(\<\:)[a-z0-9]+(\:)[0-9]+(\>)$)/gi)) {
                 emoji = target
-                emoji = source.member.client.emojis.resolve(target.split(":")[2].slice(0, -1))
+                emoji = source.member.client.emojis.resolve(target.split(':')[2].slice(0, -1))
             }
             return emoji != undefined
         }
