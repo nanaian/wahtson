@@ -105,7 +105,7 @@ usage = "buy_taco"
     item = "Taco"
     repeatable = true
     price = 2
-    # Placeholders: $balance, $outstanding, $transaction
+    # Placeholders: $balance, $outstanding
     text_success = "Successfully purchased $_item, new balance: $balance"
     text_poor = "Not enough coins to purchase $_item, you need $outstanding more"
     text_duplicate = "You already have that item" # Only used when `repeatable = false`
