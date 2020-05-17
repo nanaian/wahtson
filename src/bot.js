@@ -503,7 +503,7 @@ const handlePlaceholders = (str, objs = {}) => {
 }
 
 const replaceArgPlaceholders = (str, args) => {
-    for (var i = 0; i < args.length; i++) {
+    for (let i = 0; i < args.length; i++) {
         const re = new RegExp(escapeRegexSpecialChars('$arg' + i), 'g')
         str = str.replace(re, args[i])
     }
