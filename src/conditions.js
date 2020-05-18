@@ -19,7 +19,11 @@ module.exports = {
     },
 
     async PREVIOUS_ACTION_SKIPPED(source, opts, state) {
-        return state.previousActionSkipped
+        if(opts.has("ago")) {
+            return state.previousActionsSkipped[state.previousActionsSkipped.length - opts.getNumber("ago")]
+        } else {
+            return state.previousActionsSkipped[state.previousActionsSkipped.length-1]
+        }
     },
 
     async REQUIRE_COINS(source, opts, state) {
@@ -147,5 +151,8 @@ module.exports = {
                 if (collected.size == 0) resolve(false)
             })
         })
+    },
+    async RANDOM_CHANCE(source, opts, state) {
+        return Math.random() * 100 < opts.getNumber('percent')
     },
 }
