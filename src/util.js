@@ -150,9 +150,7 @@ function safeToString(x) {
     }
 }
 
-const uniqueArray = a => a.filter((item, index) => (
-    a.indexOf(item) == index
-))
+const uniqueArray = a => a.filter((item, index) => a.indexOf(item) == index)
 
 const emojiMap = require('./emoji_map.json')
 const strToEmoji = target => {
