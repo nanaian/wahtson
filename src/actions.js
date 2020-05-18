@@ -212,8 +212,7 @@ module.exports = {
                 embed: {
                     title: 'Categories',
                     footer: {
-                        icon_url: state.avatar,
-                        text: 'WAHtson Help | Categories',
+                        text: 'Help | Categories',
                     },
                     author: {
                         name: 'Help',
@@ -221,13 +220,12 @@ module.exports = {
                     },
                     fields: [
                         categories.map(cat => {
-                            var catCmds = commands.filter(cmd => {
+                            const catCmds = commands.filter(cmd => {
                                 return cmd.category == cat
                             })
-                            var catCmdsLength = catCmds.length
-                            catCmds.length = 3
-                            if (catCmdsLength > 3)
-                                catCmds[3] = { usage: `**${catCmdsLength} more commands**` }
+                            if (catCmds.length > 3)
+                                catCmds[3] = { usage: `**${catCmds.length - 3} more commands**` }
+                                catCmds.length = 4
                             return {
                                 name: cat,
                                 value: catCmds.map(cmd => {
@@ -243,8 +241,7 @@ module.exports = {
                 embed: {
                     title: catPage,
                     footer: {
-                        icon_url: state.avatar,
-                        text: `WAHtson Help | ${catPage}`,
+                        text: `Help | ${catPage}`,
                     },
                     author: {
                         name: 'Help',
