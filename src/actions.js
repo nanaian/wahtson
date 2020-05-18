@@ -220,7 +220,7 @@ module.exports = {
                     },
                     fields: [
                         categories.map(cat => {
-                            const catCmds = commands.filter(cmd => {
+                            let catCmds = commands.filter(cmd => {
                                 return cmd.category == cat
                             })
                             if (catCmds.length > 3) {
