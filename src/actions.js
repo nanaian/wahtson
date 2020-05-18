@@ -1,5 +1,5 @@
 const chalk = require('chalk')
-const { replacePlaceholders, attachmentType, escapeMarkdown, getBalance } = require('./util.js')
+const { uniqueArray, replacePlaceholders, attachmentType, escapeMarkdown, getBalance } = require('./util.js')
 
 module.exports = {
     // Sends a message (option: 'text') to the source channel.
@@ -172,6 +172,92 @@ module.exports = {
 
         if (opts.has('text')) {
             source.channel.send(handlePlaceholders(opts.getText('text'), placeholders))
+        }
+    },
+    
+    async SEND_HELP(source, opts, state) {
+        let commands = (await state.config.get('commands'))
+            .filter(cmd => {
+                return cmd.hidden != true
+            })
+            .map(c => {
+                return {
+                    usage: c.usage,
+                    description: c.description,
+                    category: c.category ? c.category : 'Uncategorized',
+                }
+            })
+        let categories = uniqueArray(
+            commands
+                .map(c => {
+                    return c.category
+                })
+                .filter(c => {
+                    return c != undefined
+                }),
+        )
+    
+        let catPage = categories.find(cat => {
+            return cat.toLowerCase().startsWith(opts.getText('page').toLowerCase())
+        })
+    
+        if (typeof catPage == 'undefined') {
+            source.channel.send({
+                embed: {
+                    title: 'Categories',
+                    footer: {
+                        icon_url: state.avatar,
+                        text: 'WAHtson Help | Categories',
+                    },
+                    author: {
+                        name: 'Help',
+                        icon_url: state.avatar,
+                    },
+                    fields: [
+                        categories.map(cat => {
+                            var catCmds = commands.filter(cmd => {
+                                return cmd.category == cat
+                            })
+                            var catCmdsLength = catCmds.length
+                            catCmds.length = 3
+                            if (catCmdsLength > 3)
+                                catCmds[3] = { usage: `**${catCmdsLength} more commands**` }
+                            return {
+                                name: cat,
+                                value: catCmds.map(cmd => {
+                                    return cmd.usage
+                                }),
+                            }
+                        }),
+                    ],
+                },
+            })
+        } else {
+            source.channel.send({
+                embed: {
+                    title: catPage,
+                    footer: {
+                        icon_url: state.avatar,
+                        text: `WAHtson Help | ${catPage}`,
+                    },
+                    author: {
+                        name: 'Help',
+                        icon_url: state.avatar,
+                    },
+                    fields: [
+                        commands
+                            .filter(cmd => {
+                                return cmd.category == catPage
+                            })
+                            .map(cmd => {
+                                return {
+                                    name: cmd.usage,
+                                    value: cmd.description ? cmd.description : 'No Description',
+                                }
+                            }),
+                    ],
+                },
+            })
         }
     },
 }
