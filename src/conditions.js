@@ -19,10 +19,12 @@ module.exports = {
     },
 
     async PREVIOUS_ACTION_SKIPPED(source, opts, state) {
-        if(opts.has("ago")) {
-            return state.previousActionsSkipped[state.previousActionsSkipped.length - opts.getNumber("ago")]
+        if (opts.has('ago')) {
+            return state.previousActionsSkipped[
+                state.previousActionsSkipped.length - opts.getNumber('ago')
+            ]
         } else {
-            return state.previousActionsSkipped[state.previousActionsSkipped.length-1]
+            return state.previousActionsSkipped[state.previousActionsSkipped.length - 1]
         }
     },
 
