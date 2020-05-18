@@ -225,7 +225,7 @@ module.exports = {
                             })
                             if (catCmds.length > 3) {
                                 catCmds[3] = { usage: `**${catCmds.length - 3} more commands**` }
-                                catCmds = catCmds.slice(0, 3)
+                                catCmds = catCmds.slice(0, 4)
                             }
                             return {
                                 name: cat,
