@@ -223,9 +223,10 @@ module.exports = {
                             const catCmds = commands.filter(cmd => {
                                 return cmd.category == cat
                             })
-                            if (catCmds.length > 3)
+                            if (catCmds.length > 3) {
                                 catCmds[3] = { usage: `**${catCmds.length - 3} more commands**` }
                                 catCmds.length = 4
+                            }
                             return {
                                 name: cat,
                                 value: catCmds.map(cmd => {
