@@ -225,7 +225,7 @@ module.exports = {
                             })
                             if (catCmds.length > 3)
                                 catCmds[3] = { usage: `**${catCmds.length - 3} more commands**` }
-                                catCmds.length = 4
+                            catCmds.length = 4
                             return {
                                 name: cat,
                                 value: catCmds.map(cmd => {
