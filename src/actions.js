@@ -1,5 +1,11 @@
 const chalk = require('chalk')
-const { uniqueArray, replacePlaceholders, attachmentType, escapeMarkdown, getBalance } = require('./util.js')
+const {
+    uniqueArray,
+    replacePlaceholders,
+    attachmentType,
+    escapeMarkdown,
+    getBalance,
+} = require('./util.js')
 
 module.exports = {
     // Sends a message (option: 'text') to the source channel.
@@ -174,7 +180,7 @@ module.exports = {
             source.channel.send(handlePlaceholders(opts.getText('text'), placeholders))
         }
     },
-    
+
     async SEND_HELP(source, opts, state) {
         let commands = (await state.config.get('commands'))
             .filter(cmd => {
@@ -196,11 +202,11 @@ module.exports = {
                     return c != undefined
                 }),
         )
-    
+
         let catPage = categories.find(cat => {
             return cat.toLowerCase().startsWith(opts.getText('page').toLowerCase())
         })
-    
+
         if (typeof catPage == 'undefined') {
             source.channel.send({
                 embed: {
