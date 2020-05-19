@@ -79,6 +79,7 @@ client.on('message', async msg => {
 
         if (!commandAttempted) {
             const member = msg.member || (await guild.fetchMember(msg.author))
+            if (!(await config.has('on_message'))) return
             await executeActionChain(await config.get('on_message'), {
                 message: msg,
                 channel: msg.channel,
