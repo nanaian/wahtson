@@ -34,6 +34,7 @@ module.exports = {
                 this.emit('event', event)
             }
         }
+
         async start() {
             await module.exports.send
 
