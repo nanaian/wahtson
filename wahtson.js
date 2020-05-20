@@ -33,10 +33,11 @@ bot.on('event', event => {
         console.log(chalk.cyan(event.text))
     }
     if (event.type == 'ACTION') {
-        process.stdout.write(
-            chalk.grey(`${event.index}. ${event.data.type}`) +
-                (event.skipped ? chalk.magenta(' skipped') : ''),
-        )
+        if(event.skipped) {
+            process.stdout.write(chalk.grey(`${event.index}. ${event.data.type}`))
+        } else {
+            process.stdout.write(chalk.magenta(`${event.index}. ${event.data.type}`))
+        }
         if (event.index == event.length) process.stdout.write('\n')
         else process.stdout.write(' | ')
     }
