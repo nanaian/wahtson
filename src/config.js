@@ -4,7 +4,6 @@ const fs = require('fs')
 const toml = require('toml')
 const open = require('open')
 
-
 const CONFIG_EXAMPLE_PATH = path.join(__dirname, '../config-example.toml')
 
 let cache,
@@ -12,7 +11,7 @@ let cache,
 
 module.exports = {
     async load(CONFIG_TOML_PATH) {
-        const { send } = require('./bot.js');
+        const { send } = require('./bot.js')
         const source = await p(fs.readFile)(CONFIG_TOML_PATH).catch(async err => {
             send('warning', 'config.toml not found! copying the example file...')
             await p(fs.copyFile)(CONFIG_EXAMPLE_PATH, CONFIG_TOML_PATH)

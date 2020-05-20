@@ -17,26 +17,30 @@ let guild, db
 
 const EventEmitter = require('events')
 
-let send;
+let send
 
 module.exports = {
     Wahtson: class Bot extends EventEmitter {
         constructor(botOptions) {
             super()
             this.botOptions = botOptions || {}
-            this.version = version;
-            
-            send = async (a,b) => { this.emit(a,b) };
-            module.exports.send = async (a,b) => { this.emit(a,b) };
-            send("info", ["test", "cyan"])
+            this.version = version
+
+            send = async (a, b) => {
+                this.emit(a, b)
+            }
+            module.exports.send = async (a, b) => {
+                this.emit(a, b)
+            }
+            send('info', ['test', 'cyan'])
         }
         async start() {
-            let configPath = (this.botOptions.configPath || './config.toml')
+            let configPath = this.botOptions.configPath || './config.toml'
             config
                 .load(configPath)
                 .then(() =>
                     sqlite.open({
-                        filename: (this.botOptions.dbPath || './database.sqlite'),
+                        filename: this.botOptions.dbPath || './database.sqlite',
                         driver: Database,
                     }),
                 )
@@ -55,7 +59,7 @@ module.exports = {
                     process.exit(1)
                 })
         }
-    }
+    },
 }
 
 client.once('ready', async () => {
@@ -111,10 +115,7 @@ client.on('message', async msg => {
 
             if (!member) return // Not a member of the server
 
-            send('info', [
-                `@${member.displayName} issued command: ${msg.cleanContent}`,
-                'cyan',
-            ])
+            send('info', [`@${member.displayName} issued command: ${msg.cleanContent}`, 'cyan'])
 
             if (commandConfig) {
                 await executeActionChain(commandConfig.actions, {
@@ -235,10 +236,7 @@ client.on('messageReactionRemove', async (reaction, user) => {
             const wantedEmoji = opts.getEmoji('emoji')
 
             if (reaction.emoji.name === wantedEmoji) {
-                send('info', [
-                    `@${member.displayName} removed ${wantedEmoji} reaction`,
-                    'cyan',
-                ])
+                send('info', [`@${member.displayName} removed ${wantedEmoji} reaction`, 'cyan'])
 
                 await executeActionChain(rConfig.remove_actions, {
                     event_call: 'reaction_remove',
