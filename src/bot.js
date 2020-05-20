@@ -297,7 +297,7 @@ async function executeActionChain(actions, source) {
             }
         }
         action = await placeholdersInOpts(action, source)
-        
+
         if (action.when) {
             const conditions = Array.isArray(action.when) ? action.when : [action.when]
             let conditionsOk = true
