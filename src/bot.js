@@ -93,7 +93,7 @@ client.once('ready', async () => {
         }
     }
 
-    send({ type: 'STATUS', text: 'Server found. listening for commands...' })
+    send({ type: 'STATUS', text: 'Server found. Listening for commands...' })
 })
 
 client.on('message', async msg => {
@@ -332,7 +332,7 @@ async function executeActionChain(actions, source) {
                 if (!conditionFn) {
                     send({
                         type: 'ERROR',
-                        text: `Error: unknown condition type '${condition.type}'`,
+                        text: `Error: Unknown condition type '${condition.type}'\n`,
                     })
                     conditionsOk = false
                     break
@@ -342,7 +342,7 @@ async function executeActionChain(actions, source) {
                 try {
                     ok = await conditionFn(source, makeResolvable(condition), state)
                 } catch (err) {
-                    send({ type: 'ERROR', text: `Error: '${err}'` })
+                    send({ type: 'ERROR', text: `Error: '${err}\n'` })
                     conditionsOk = false
                     break
                 }
@@ -373,7 +373,7 @@ async function executeActionChain(actions, source) {
         const fn = actionFunctions[action.type]
 
         if (!fn) {
-            send({ type: 'ERROR', text: 'Error: unknown action type' })
+            send({ type: 'ERROR', text: 'Error: Unknown action type\n' })
             continue
         }
 
@@ -550,5 +550,5 @@ const placeholdersInOpts = (opts, source) => {
 }
 
 process.on('unhandledRejection', error => {
-    send({ type: 'ERROR', text: `Error: '${error.stack || error}'` })
+    send({ type: 'ERROR', text: `Error: '${error.stack || error}'\n` })
 })

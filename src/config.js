@@ -15,7 +15,7 @@ module.exports = {
             send({
                 type: 'ERROR',
                 precaution: 'COPY_EXAMPLE_CONFIG',
-                text: 'config.toml not found! copying the example file...',
+                text: 'config.toml not found! Copying the example file...\n',
             })
             await p(fs.copyFile)(CONFIG_EXAMPLE_PATH, CONFIG_TOML_PATH)
 
@@ -36,7 +36,7 @@ module.exports = {
             send({
                 type: 'ERROR',
                 precaution: 'OPEN_CONFIG',
-                text: `syntax error in config.toml on line ${err.line} column ${err.column}`,
+                text: `Syntax error in config.toml on line ${err.line} column ${err.column}\n`,
             })
 
             //await this.load(CONFIG_TOML_PATH)
@@ -54,7 +54,7 @@ module.exports = {
             send({
                 type: 'ERROR',
                 precaution: 'OPEN_CONFIG',
-                text: `config.toml '${key}' is missing`,
+                text: `config.toml '${key}' is missing\n`,
             })
         }
 
@@ -66,7 +66,7 @@ module.exports = {
                 send({
                     type: 'ERROR',
                     precaution: 'OPEN_CONFIG',
-                    text: `config.toml '${key}' is invalid`,
+                    text: `config.toml '${key}' is invalid\n`,
                 })
 
                 return await this.get(key, testFn)
