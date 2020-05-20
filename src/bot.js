@@ -24,7 +24,10 @@ module.exports = {
     Wahtson: class Bot extends EventEmitter {
         constructor(botOptions) {
             super()
-            this.botOptions = botOptions || { configPath: path.join(__dirname, '../config.toml'), dbPath: path.join(__dirname, '../database.sqlite') }
+            this.botOptions = botOptions || {
+                configPath: path.join(__dirname, '../config.toml'),
+                dbPath: path.join(__dirname, '../database.sqlite'),
+            }
             this.version = version
 
             send = async event => {
