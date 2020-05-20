@@ -3,16 +3,14 @@ const path = require('path')
 const fs = require('fs')
 const toml = require('toml')
 const open = require('open')
-const chalk = require('chalk')
 
-const CONFIG_TOML_PATH = './config.toml'
 const CONFIG_EXAMPLE_PATH = path.join(__dirname, '../config-example.toml')
 
 let cache,
     isWatching = false
 
 module.exports = {
-    async load() {
+    async load(CONFIG_TOML_PATH) {
         const source = await p(fs.readFile)(CONFIG_TOML_PATH).catch(async err => {
             console.log(chalk.red('config.toml not found! copying the example file...'))
             await p(fs.copyFile)(CONFIG_EXAMPLE_PATH, CONFIG_TOML_PATH)
