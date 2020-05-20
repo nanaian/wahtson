@@ -47,7 +47,7 @@ bot.on('event', event => {
         console.log(chalk.yellow(event.text))
     }
     if (event.type == 'ERROR') {
-        process.stdout.write(chalk.red(event.text) + " ")
+        process.stdout.write(chalk.red(event.text) + ' ')
 
         if (event.precaution == 'COPY_EXAMPLE_CONFIG') {
         }
