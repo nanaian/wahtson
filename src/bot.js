@@ -34,6 +34,7 @@ module.exports = {
             }
             send('info', ['test', 'cyan'])
         }
+
         async start() {
             let configPath = this.botOptions.configPath || './config.toml'
             config
