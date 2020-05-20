@@ -6,9 +6,7 @@ const {
     escapeMarkdown,
     getBalance,
 } = require('./util.js')
-const {
-    events
-} = require('./bot.js')
+const { events } = require('./bot.js')
 
 module.exports = {
     // Sends a message (option: 'text') to the source channel.
@@ -142,7 +140,10 @@ module.exports = {
                 if (await state.config.has('purchases')) {
                     if (!source.member) return // Not a member of the server
 
-                    events.emit("info", [`@${source.member.displayName} purchased: ${opts.getText('item')}`, 'cyan'])
+                    events.emit('info', [
+                        `@${source.member.displayName} purchased: ${opts.getText('item')}`,
+                        'cyan',
+                    ])
 
                     const purchaseConfig = (await state.config.get('purchases')).find(pch => {
                         const [itemName] = pch.item.split(' ') // TODO: parse properly
