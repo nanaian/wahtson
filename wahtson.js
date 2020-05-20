@@ -33,7 +33,7 @@ bot.on('event', event => {
         console.log(chalk.cyan(event.text))
     }
     if (event.type == 'ACTION') {
-        if(event.skipped) {
+        if (event.skipped) {
             process.stdout.write(chalk.grey(`${event.index}. ${event.data.type}`))
         } else {
             process.stdout.write(chalk.magenta(`${event.index}. ${event.data.type}`))
@@ -48,7 +48,7 @@ bot.on('event', event => {
         console.log(chalk.yellow(event.text))
     }
     if (event.type == 'ERROR') {
-        process.stdout.write(chalk.red(event.text) + " ")
+        process.stdout.write(chalk.red(event.text) + ' ')
 
         if (event.precaution == 'COPY_EXAMPLE_CONFIG') {
         }
