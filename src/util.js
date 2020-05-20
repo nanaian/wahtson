@@ -22,13 +22,13 @@ const timeObjToMs = timeObj => {
     return ms
 }
 
-const checkCooldown = async (userid, cooldownid, state, count_use) => {
+const checkCooldown = async (userid, cooldownid, state, count_use, timeRequired) => {
     const cooldown = await state.db.get(
         'SELECT * FROM cooldowns WHERE userid = ? AND cooldownid = ?',
         userid,
         cooldownid,
     )
-    if (count_use) {
+    if (count_use && Date.now() - cooldown.date > timeRequired) {
         if (cooldown == undefined || isNaN(cooldown.date)) {
             await state.db.run(
                 'INSERT INTO cooldowns (userid, cooldownid, date) VALUES (?, ?, ?)',

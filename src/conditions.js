@@ -58,6 +58,7 @@ module.exports = {
             opts.cooldown_group || source.command,
             state,
             await opts.getBoolean('count_use', true),
+            timeRequired,
         )
 
         return Date.now() - lastUsed > timeRequired
