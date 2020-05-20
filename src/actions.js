@@ -1,4 +1,3 @@
-const chalk = require('chalk')
 const {
     uniqueArray,
     replacePlaceholders,
@@ -6,7 +5,8 @@ const {
     escapeMarkdown,
     getBalance,
 } = require('./util.js')
-const { events } = require('./bot.js')
+
+const { send } = require('./bot.js')
 
 module.exports = {
     // Sends a message (option: 'text') to the source channel.
@@ -140,7 +140,7 @@ module.exports = {
                 if (await state.config.has('purchases')) {
                     if (!source.member) return // Not a member of the server
 
-                    events.emit('info', [
+                    send('info', [
                         `@${source.member.displayName} purchased: ${opts.getText('item')}`,
                         'cyan',
                     ])

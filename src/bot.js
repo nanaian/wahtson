@@ -16,46 +16,57 @@ const client = new Client()
 let guild, db
 
 const EventEmitter = require('events')
-const event = new EventEmitter()
+
+let send;
 
 module.exports = {
-    version: version,
-    start: (botOptions = {}) => {
-        config
-            .load(botOptions.configPath || './config.toml')
-            .then(() =>
-                sqlite.open({
-                    filename: botOptions.dbPath || './database.sqlite',
-                    driver: Database,
-                }),
-            )
-            .then(async _db => {
-                db = _db
-                await db.migrate()
-            })
-            .then(async () => {
-                config.get('bot_token', async token => {
-                    await client.login(token)
-                    return true
+    Wahtson: class Bot extends EventEmitter {
+        constructor(botOptions) {
+            super()
+            this.botOptions = botOptions || {}
+            this.version = version;
+            
+            send = async (a,b) => { this.emit(a,b) };
+            module.exports.send = async (a,b) => { this.emit(a,b) };
+            send("info", ["test", "cyan"])
+        }
+        async start() {
+            let configPath = (this.botOptions.configPath || './config.toml')
+            config
+                .load(configPath)
+                .then(() =>
+                    sqlite.open({
+                        filename: (this.botOptions.dbPath || './database.sqlite'),
+                        driver: Database,
+                    }),
+                )
+                .then(async _db => {
+                    db = _db
+                    await db.migrate()
                 })
-            })
-            .catch(err => {
-                event.emit('fatal_error', err)
-                process.exit(1)
-            })
-    },
-    events: event,
+                .then(async () => {
+                    config.get('bot_token', async token => {
+                        await client.login(token)
+                        return true
+                    })
+                })
+                .catch(err => {
+                    send('fatal_error', err)
+                    process.exit(1)
+                })
+        }
+    }
 }
 
 client.once('ready', async () => {
-    event.emit('info', ['Connected', 'green'])
+    send('info', ['Connected', 'green'])
 
     const serverId = await config.get('server_id')
 
     guild = client.guilds.cache.find(g => g.id === serverId)
     if (!guild) {
-        event.emit('warning', 'Bot is not present in configured server!')
-        event.emit('warning', 'Please invite it using your browser.')
+        emit('warning', 'Bot is not present in configured server!')
+        send('warning', 'Please invite it using your browser.')
 
         const { id } = await client.fetchApplication()
         await open(
@@ -72,7 +83,7 @@ client.once('ready', async () => {
         }
     }
 
-    event.emit('info', ['Server found. listening for commands...', 'green'])
+    send('info', ['Server found. listening for commands...', 'green'])
 })
 
 client.on('message', async msg => {
@@ -92,6 +103,7 @@ client.on('message', async msg => {
                 channel: msg.channel,
                 member: msg.member,
                 command: null,
+                limitLog: (await config.get('on_message')).limit_log,
                 args: [],
             })
         } else {
@@ -99,7 +111,7 @@ client.on('message', async msg => {
 
             if (!member) return // Not a member of the server
 
-            event.emit('info', [
+            send('info', [
                 `@${member.displayName} issued command: ${msg.cleanContent}`,
                 'cyan',
             ])
@@ -111,6 +123,7 @@ client.on('message', async msg => {
                     channel: msg.channel,
                     member: member,
                     command: commandString,
+                    limitLog: commandConfig.limit_log,
                     args: args.filter(el => el != ''),
                 })
             } else {
@@ -120,6 +133,7 @@ client.on('message', async msg => {
                     channel: msg.channel,
                     member: member,
                     command: commandString,
+                    limitLog: (await config.get('on_unknown_command')).limit_log,
                     args: args.filter(el => el != ''),
                 })
             }
@@ -131,7 +145,7 @@ client.on('guildMemberAdd', async member => {
     if (!guild) return
     if (member.guild.id !== guild.id) return
 
-    event.emit('info', [`@${member.displayName} joined`, cyan])
+    send('info', [`@${member.displayName} joined`, cyan])
 
     await executeActionChain(await config.get('on_new_member'), {
         event_call: 'on_new_member',
@@ -139,6 +153,7 @@ client.on('guildMemberAdd', async member => {
         channel: null,
         member: member,
         command: null,
+        limitLog: (await config.get('on_new_member')).limit_log,
         args: [],
     })
 })
@@ -188,7 +203,7 @@ client.on('messageReactionAdd', async (reaction, user) => {
             const wantedEmoji = opts.getEmoji('emoji')
 
             if (reaction.emoji.name === wantedEmoji) {
-                event.emit('info', [`@${member.displayName} added ${wantedEmoji} reaction`, 'cyan'])
+                send('info', [`@${member.displayName} added ${wantedEmoji} reaction`, 'cyan'])
 
                 await executeActionChain(rConfig.add_actions, {
                     event_call: 'reaction_add',
@@ -196,6 +211,7 @@ client.on('messageReactionAdd', async (reaction, user) => {
                     channel: reaction.message.channel,
                     member,
                     command: null,
+                    limitLog: rConfig.limit_log,
                     args: [],
                 })
             }
@@ -219,7 +235,7 @@ client.on('messageReactionRemove', async (reaction, user) => {
             const wantedEmoji = opts.getEmoji('emoji')
 
             if (reaction.emoji.name === wantedEmoji) {
-                event.emit('info', [
+                send('info', [
                     `@${member.displayName} removed ${wantedEmoji} reaction`,
                     'cyan',
                 ])
@@ -230,6 +246,7 @@ client.on('messageReactionRemove', async (reaction, user) => {
                     channel: reaction.message.channel,
                     member,
                     command: null,
+                    limitLog: rConfig.limit_log,
                     args: [],
                 })
             }
@@ -257,7 +274,7 @@ async function handlePossiblePin(reaction) {
         ))
 
         if (!isPinned) {
-            event.emit('info', [`Pinning message`, 'cyan'])
+            send('info', [`Pinning message`, 'cyan'])
 
             await db.run(sql`INSERT INTO pins VALUES (${reaction.message.id})`)
 
@@ -267,6 +284,7 @@ async function handlePossiblePin(reaction) {
                 channel: reaction.message.channel,
                 member: reaction.message.member,
                 command: null,
+                limitLog: pinConfig.limit_log,
                 args: [],
             })
         }
@@ -306,7 +324,7 @@ async function executeActionChain(actions, source) {
                 const conditionFn = conditionFunctions[condition.type]
 
                 if (!conditionFn) {
-                    event.emit('error', ` Error: unknown condition type '${condition.type}'`)
+                    send('error', ` Error: unknown condition type '${condition.type}'`)
                     conditionsOk = false
                     break
                 }
@@ -315,7 +333,7 @@ async function executeActionChain(actions, source) {
                 try {
                     ok = await conditionFn(source, makeResolvable(condition), state)
                 } catch (err) {
-                    event.emit('error', ` Error: '${err}'`)
+                    send('error', ` Error: '${err}'`)
                     conditionsOk = false
                     break
                 }
@@ -332,7 +350,7 @@ async function executeActionChain(actions, source) {
 
             if (!conditionsOk) {
                 state.previousActionsSkipped.push(true)
-                event.emit('action', [idx + 1, action, true])
+                send('action', [idx + 1, action, true, source.limitLog])
                 continue
             }
         }
@@ -340,17 +358,17 @@ async function executeActionChain(actions, source) {
         const fn = actionFunctions[action.type]
 
         if (!fn) {
-            event.emit('error', ' error: unknown action type')
+            send('error', ' Error: unknown action type')
             continue
         }
 
         await fn(source, makeResolvable(action), state).catch(err => {
-            event.emit('error', ` Error: ${err}`)
+            send('error', ` Error: ${err}`)
         })
 
         state.previousActionsSkipped.push(false)
 
-        event.emit('action', [idx + 1, action, false])
+        send('action', [idx + 1, action, false, source.limitLog])
     }
 }
 
@@ -511,5 +529,6 @@ const placeholdersInOpts = (opts, source) => {
 }
 
 process.on('unhandledRejection', error => {
-    event.emit('error', `Error: ${error.stack || error}`)
+    console.log(`Error: ${error.stack || error}`)
+    send('error', `Error: ${error.stack || error}`)
 })
