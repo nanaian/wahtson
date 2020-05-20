@@ -15,8 +15,6 @@ const { version } = require('../package.json')
 const client = new Client()
 let guild, db
 
-//if(process.versions["electron"]) console.log = (text) => {}
-
 process.title = `WAHtson ${version}`
 console.log(`WAHtson ${version}`)
 
