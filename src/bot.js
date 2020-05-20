@@ -25,7 +25,7 @@ module.exports = {
             .load(botOptions.configPath || './config.toml')
             .then(() =>
                 sqlite.open({
-                    filename: (botOptions.dbPath || './database.sqlite'),
+                    filename: botOptions.dbPath || './database.sqlite',
                     driver: Database,
                 }),
             )

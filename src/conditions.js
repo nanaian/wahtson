@@ -140,7 +140,7 @@ module.exports = {
             ) {
                 resolve(true)
             }
-            
+
             if (timeLimit == 0) {
                 resolve(
                     source.message.reactions.cache.find(
