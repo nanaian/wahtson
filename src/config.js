@@ -45,7 +45,7 @@ module.exports = {
 
     async get(key, testFn = () => true) {
         let { send } = require('./bot.js')
-    
+
         if (!cache) {
             await this.load(CONFIG_TOML_PATH)
         }
