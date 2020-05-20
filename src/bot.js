@@ -5,6 +5,7 @@ const sqlite = require('sqlite')
 const { Database } = require('sqlite3')
 const sql = require('sql-template-strings')
 const shortEmoji = require('emoji-to-short-name')
+const path = require('path')
 
 const config = require('./config.js')
 const { safeToString, handlePlaceholders, sleep, userHasItem } = require('./util.js')
@@ -23,30 +24,32 @@ module.exports = {
     Wahtson: class Bot extends EventEmitter {
         constructor(botOptions) {
             super()
-            this.botOptions = botOptions || {}
+            this.botOptions = botOptions || { configPath: path.join(__dirname, '../config.toml'), dbPath: path.join(__dirname, '../database.sqlite') }
             this.version = version
 
-            send = async (a, b) => {
-                this.emit(a, b)
+            send = async event => {
+                this.emit('event', event)
             }
-            module.exports.send = async (a, b) => {
-                this.emit(a, b)
+            module.exports.send = async event => {
+                this.emit('event', event)
             }
-            send('info', ['test', 'cyan'])
         }
         async start() {
-            let configPath = this.botOptions.configPath || './config.toml'
+            await module.exports.send
+
+            let configPath = this.botOptions.configPath
             config
                 .load(configPath)
                 .then(() =>
                     sqlite.open({
-                        filename: this.botOptions.dbPath || './database.sqlite',
+                        filename: this.botOptions.dbPath,
                         driver: Database,
                     }),
                 )
                 .then(async _db => {
                     db = _db
                     await db.migrate()
+                    this.emit('ready', config)
                 })
                 .then(async () => {
                     config.get('bot_token', async token => {
@@ -55,22 +58,21 @@ module.exports = {
                     })
                 })
                 .catch(err => {
-                    send('fatal_error', err)
-                    process.exit(1)
+                    send({ type: 'FATAL', text: err })
                 })
         }
     },
 }
 
 client.once('ready', async () => {
-    send('info', ['Connected', 'green'])
+    send({ type: 'STATUS', text: 'Connected' })
 
     const serverId = await config.get('server_id')
 
     guild = client.guilds.cache.find(g => g.id === serverId)
     if (!guild) {
-        emit('warning', 'Bot is not present in configured server!')
-        send('warning', 'Please invite it using your browser.')
+        send({ type: 'WARN', text: 'Bot is not present in configured server!' })
+        send({ type: 'WARN', text: 'Please invite it using your browser.' })
 
         const { id } = await client.fetchApplication()
         await open(
@@ -87,7 +89,7 @@ client.once('ready', async () => {
         }
     }
 
-    send('info', ['Server found. listening for commands...', 'green'])
+    send({ type: 'STATUS', text: 'Server found. listening for commands...' })
 })
 
 client.on('message', async msg => {
@@ -115,7 +117,10 @@ client.on('message', async msg => {
 
             if (!member) return // Not a member of the server
 
-            send('info', [`@${member.displayName} issued command: ${msg.cleanContent}`, 'cyan'])
+            send({
+                type: 'INFO',
+                text: `@${member.displayName} issued command: ${msg.cleanContent}`,
+            })
 
             if (commandConfig) {
                 await executeActionChain(commandConfig.actions, {
@@ -134,7 +139,6 @@ client.on('message', async msg => {
                     channel: msg.channel,
                     member: member,
                     command: commandString,
-                    limitLog: (await config.get('on_unknown_command')).limit_log,
                     args: args.filter(el => el != ''),
                 })
             }
@@ -146,7 +150,7 @@ client.on('guildMemberAdd', async member => {
     if (!guild) return
     if (member.guild.id !== guild.id) return
 
-    send('info', [`@${member.displayName} joined`, cyan])
+    send({ type: 'INFO', text: `@${member.displayName} joined`, cyan })
 
     await executeActionChain(await config.get('on_new_member'), {
         event_call: 'on_new_member',
@@ -154,7 +158,6 @@ client.on('guildMemberAdd', async member => {
         channel: null,
         member: member,
         command: null,
-        limitLog: (await config.get('on_new_member')).limit_log,
         args: [],
     })
 })
@@ -204,7 +207,7 @@ client.on('messageReactionAdd', async (reaction, user) => {
             const wantedEmoji = opts.getEmoji('emoji')
 
             if (reaction.emoji.name === wantedEmoji) {
-                send('info', [`@${member.displayName} added ${wantedEmoji} reaction`, 'cyan'])
+                send({ type: 'INFO', text: `@${member.displayName} added ${wantedEmoji} reaction` })
 
                 await executeActionChain(rConfig.add_actions, {
                     event_call: 'reaction_add',
@@ -236,7 +239,10 @@ client.on('messageReactionRemove', async (reaction, user) => {
             const wantedEmoji = opts.getEmoji('emoji')
 
             if (reaction.emoji.name === wantedEmoji) {
-                send('info', [`@${member.displayName} removed ${wantedEmoji} reaction`, 'cyan'])
+                send({
+                    type: 'INFO',
+                    text: `@${member.displayName} removed ${wantedEmoji} reaction`,
+                })
 
                 await executeActionChain(rConfig.remove_actions, {
                     event_call: 'reaction_remove',
@@ -244,7 +250,6 @@ client.on('messageReactionRemove', async (reaction, user) => {
                     channel: reaction.message.channel,
                     member,
                     command: null,
-                    limitLog: rConfig.limit_log,
                     args: [],
                 })
             }
@@ -272,7 +277,7 @@ async function handlePossiblePin(reaction) {
         ))
 
         if (!isPinned) {
-            send('info', [`Pinning message`, 'cyan'])
+            send({ type: 'INFO', text: `Pinning message` })
 
             await db.run(sql`INSERT INTO pins VALUES (${reaction.message.id})`)
 
@@ -282,7 +287,6 @@ async function handlePossiblePin(reaction) {
                 channel: reaction.message.channel,
                 member: reaction.message.member,
                 command: null,
-                limitLog: pinConfig.limit_log,
                 args: [],
             })
         }
@@ -322,7 +326,10 @@ async function executeActionChain(actions, source) {
                 const conditionFn = conditionFunctions[condition.type]
 
                 if (!conditionFn) {
-                    send('error', ` Error: unknown condition type '${condition.type}'`)
+                    send({
+                        type: 'ERROR',
+                        text: `Error: unknown condition type '${condition.type}'`,
+                    })
                     conditionsOk = false
                     break
                 }
@@ -331,7 +338,7 @@ async function executeActionChain(actions, source) {
                 try {
                     ok = await conditionFn(source, makeResolvable(condition), state)
                 } catch (err) {
-                    send('error', ` Error: '${err}'`)
+                    send({ type: 'ERROR', text: `Error: '${err}'` })
                     conditionsOk = false
                     break
                 }
@@ -348,7 +355,13 @@ async function executeActionChain(actions, source) {
 
             if (!conditionsOk) {
                 state.previousActionsSkipped.push(true)
-                send('action', [idx + 1, action, true, source.limitLog])
+                send({
+                    type: 'ACTION',
+                    index: idx + 1,
+                    data: action,
+                    skipped: true,
+                    length: actions.length,
+                })
                 continue
             }
         }
@@ -356,17 +369,23 @@ async function executeActionChain(actions, source) {
         const fn = actionFunctions[action.type]
 
         if (!fn) {
-            send('error', ' Error: unknown action type')
+            send({ type: 'ERROR', text: 'Error: unknown action type' })
             continue
         }
 
         await fn(source, makeResolvable(action), state).catch(err => {
-            send('error', ` Error: ${err}`)
+            send({ type: 'ERROR', text: `Error: ${err}` })
         })
 
         state.previousActionsSkipped.push(false)
 
-        send('action', [idx + 1, action, false, source.limitLog])
+        send({
+            type: 'ACTION',
+            index: idx + 1,
+            data: action,
+            skipped: false,
+            length: actions.length,
+        })
     }
 }
 
@@ -527,6 +546,5 @@ const placeholdersInOpts = (opts, source) => {
 }
 
 process.on('unhandledRejection', error => {
-    console.log(`Error: ${error.stack || error}`)
-    send('error', `Error: ${error.stack || error}`)
+    send({ type: 'ERROR', text: `Error: '${error.stack || error}'` })
 })

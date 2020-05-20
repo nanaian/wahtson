@@ -1,4 +1,5 @@
 @echo off
 call npm install --silent
-node wahtson.js
+cls
+node --no-warnings wahtson.js
 pause

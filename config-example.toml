@@ -3,6 +3,7 @@
 # Core bot options.
 bot_token = ""
 server_id = ""
+log_level = 0
 
 # Command prefix that must be placed before commands in order to issue them.
 # When talking to the bot in DMs this is optional.

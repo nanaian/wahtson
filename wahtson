@@ -1,3 +1,9 @@
 #!/bin/bash
+function pause(){
+ read -s -n 1 -p "Press any key to continue . . ."
+ echo ""
+}
+
 npm install --silent
-node wahtson.js
+node --no-warnings /wahtson.js
+pause
