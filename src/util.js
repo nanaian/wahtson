@@ -129,6 +129,25 @@ const replaceOptsPlaceholders = (str, opts) => {
     })
     return str
 }
+const placeholdersInOpts = (opts, source) => {
+    const newOpts = opts
+    for (key in opts) {
+        if (typeof opts[key] == 'string') {
+            newOpts[key] = handlePlaceholders(opts[key], { opts: opts, source: source })
+        }
+        if (typeof opts[key] == 'number') {
+            newOpts[key] = Number(
+                handlePlaceholders(opts[key].toString(), { opts: opts, source: source }),
+            )
+        }
+        if (typeof opts[key] == 'object') {
+            newOpts[key] = JSON.parse(
+                placeholdersInOpts(JSON.stringify(opts[key]), { opts: opts, source: source }),
+            )
+        }
+    }
+    return newOpts
+}
 
 const replacePlaceholders = (str, placeholders) => {
     Object.keys(placeholders).forEach(p => {
@@ -178,6 +197,8 @@ module.exports = {
     safeToString,
     handlePlaceholders,
     replacePlaceholders,
+    placeholdersInOpts,
+
     escapeMarkdown,
     attachmentType,
 

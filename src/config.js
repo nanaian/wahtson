@@ -1,86 +1,30 @@
-const { promisify: p } = require('util')
-const path = require('path')
-const fs = require('fs')
-const toml = require('toml')
-const CONFIG_EXAMPLE_PATH = path.join(__dirname, '../config-example.toml')
+module.exports = () => {
+    let cache = {}
 
-let cache,
-    isWatching = false
+    return {
+        reset(config = {}) {
+            cache = config
+        },
 
-module.exports = {
-    async load(CONFIG_TOML_PATH) {
-        let { send } = require('./bot.js')
-
-        const source = await p(fs.readFile)(CONFIG_TOML_PATH).catch(async err => {
-            send({
-                type: 'ERROR',
-                precaution: 'COPY_EXAMPLE_CONFIG',
-                text: 'config.toml not found! Copying the example file...\n',
-            })
-            await p(fs.copyFile)(CONFIG_EXAMPLE_PATH, CONFIG_TOML_PATH)
-
-            return await p(fs.readFile)(CONFIG_TOML_PATH)
-        })
-
-        if (!isWatching) {
-            isWatching = true
-            fs.watch(CONFIG_TOML_PATH, () => {
-                send({ type: 'DEBUG', text: 'config.toml changed, reloading...' })
-                module.exports.load(CONFIG_TOML_PATH)
-            })
-        }
-
-        try {
-            return (cache = toml.parse(source))
-        } catch (err) {
-            send({
-                type: 'ERROR',
-                precaution: 'OPEN_CONFIG',
-                text: `Syntax error in config.toml on line ${err.line} column ${err.column}\n`,
-            })
-
-            //await this.load(CONFIG_TOML_PATH)
-        }
-    },
-
-    async get(key, testFn = () => true) {
-        let { send } = require('./bot.js')
-
-        if (!cache) {
-            await this.load(CONFIG_TOML_PATH)
-        }
-
-        if (typeof cache[key] === 'undefined') {
-            send({
-                type: 'ERROR',
-                precaution: 'OPEN_CONFIG',
-                text: `config.toml '${key}' is missing\n`,
-            })
-        }
-
-        let isOk = false
-        try {
-            isOk = await testFn(cache[key])
-        } finally {
-            if (!isOk) {
-                send({
-                    type: 'ERROR',
-                    precaution: 'OPEN_CONFIG',
-                    text: `config.toml '${key}' is invalid\n`,
-                })
-
-                return await this.get(key, testFn)
+        async get(key, testFn = () => true) {
+            if (typeof cache[key] === 'undefined') {
+                throw `config '${key}' is missing`
             }
-        }
 
-        return cache[key]
-    },
+            let isOk = false
+            try {
+                isOk = await testFn(cache[key])
+            } finally {
+                if (!isOk) {
+                    throw `config '${key}' is invalid`
+                }
+            }
 
-    async has(key) {
-        if (!cache) {
-            await this.load(CONFIG_TOML_PATH)
-        }
+            return cache[key]
+        },
 
-        return typeof cache[key] !== 'undefined'
-    },
+        async has(key) {
+            return typeof cache[key] !== 'undefined'
+        },
+    }
 }

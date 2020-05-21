@@ -6,8 +6,6 @@ const {
     getBalance,
 } = require('./util.js')
 
-const { send } = require('./bot.js')
-
 module.exports = {
     // Sends a message (option: 'text') to the source channel.
     async REPLY(source, opts) {
@@ -139,11 +137,6 @@ module.exports = {
 
                 if (await state.config.has('purchases')) {
                     if (!source.member) return // Not a member of the server
-
-                    send({
-                        type: 'INFO',
-                        text: `@${source.member.displayName} purchased: ${opts.getText('item')}`,
-                    })
 
                     const purchaseConfig = (await state.config.get('purchases')).find(pch => {
                         const [itemName] = pch.item.split(' ') // TODO: parse properly
