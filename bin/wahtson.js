@@ -10,7 +10,7 @@ const { version } = require('../package.json')
 
 if (argv.h || argv.help) {
     console.log(
-`
+        `
 highly configurable discord bot
 
 USAGE:
@@ -22,7 +22,8 @@ OPTIONS:
         --no-watch          Disable reloading the config file when it changes
     -v, --version           Print version info and exit
     -h, --help              Print help information and exit
-`)
+`,
+    )
 } else if (argv.v || argv.version) {
     console.log(`wahtson ${version}`)
 } else {

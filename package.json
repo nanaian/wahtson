@@ -12,7 +12,7 @@
   "main": "src/bot.js",
   "scripts": {
     "start": "node .",
-    "lint": "prettier --single-quote --trailing-comma all --no-semi --arrow-parens avoid --print-width 100 --tab-width 4 --write src/**/*.js --write wahtson.js"
+    "lint": "prettier --single-quote --trailing-comma all --no-semi --arrow-parens avoid --print-width 100 --tab-width 4 --write src/**/*.js bin/**/*.js"
   },
   "dependencies": {
     "chalk": "^4.0.0",
