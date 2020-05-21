@@ -8,10 +8,10 @@ const {
 
 module.exports = {
     async SEND_TO_CHANNEL(source, opts) {
-        await opts.getChannel("to").send(opts.getText('text'))
+        await opts.getChannel('to').send(opts.getText('text'))
     },
     async SEND_TO_USER(source, opts) {
-        await opts.getMember("to").send(opts.getText('text'))
+        await opts.getMember('to').send(opts.getText('text'))
     },
     // Sends a message (option: 'text') to the source channel.
     async REPLY(source, opts) {

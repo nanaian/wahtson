@@ -554,9 +554,13 @@ module.exports = class Bot extends EventEmitter {
                 const re = /^(.)+\#([0-9]){4}$/g
                 if (raw.match(re)) {
                     // By name
-                    const memberParts = raw.split("#")
+                    const memberParts = raw.split('#')
 
-                    member = this.guild.members.cache.find(m => m.user.username === memberParts[0] && m.user.discriminator == memberParts[1] )
+                    member = this.guild.members.cache.find(
+                        m =>
+                            m.user.username === memberParts[0] &&
+                            m.user.discriminator == memberParts[1],
+                    )
                 } else {
                     // By ID
                     member = this.guild.members.cache.find(m => m.id === raw)
