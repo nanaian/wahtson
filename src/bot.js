@@ -4,6 +4,7 @@ const sqlite = require('sqlite')
 const { Database } = require('sqlite3')
 const sql = require('sql-template-strings')
 const shortEmoji = require('emoji-to-short-name')
+const path = require('path')
 
 const config = require('./config.js')
 const { safeToString, placeholdersInOpts, sleep, userHasItem } = require('./util.js')
@@ -251,7 +252,7 @@ module.exports = class Bot extends EventEmitter {
             driver: Database,
         })
         await this.db.migrate({
-            migrationsPath: __dirname+'\\..\\migrations'
+            migrationsPath: path.join(__dirname,'..','migrations')
         })
 
         const p = new Promise((resolve, reject) => {
