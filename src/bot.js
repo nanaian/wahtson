@@ -431,7 +431,7 @@ module.exports = class Bot extends EventEmitter {
         }
     }
 
-    async handlePossiblePin(reaction) {
+    handlePossiblePin = async (reaction) => {
         const pinConfig = await this.config.get('pin')
         const opts = this.makeResolvable(pinConfig)
 
