@@ -477,7 +477,7 @@ module.exports = class Bot extends EventEmitter {
         return {
             getKeys: () => Object.keys(map),
 
-            has: key =>{
+            has: key => {
                 return map.hasOwnProperty(key)
             },
 
