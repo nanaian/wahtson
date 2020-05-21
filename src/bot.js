@@ -366,6 +366,7 @@ async function executeActionChain(actions, source) {
                     skipped: true,
                     length: actions.length,
                     source: source.message.id,
+                    event: source.event_call,
                 })
                 continue
             }
@@ -391,6 +392,7 @@ async function executeActionChain(actions, source) {
             skipped: false,
             length: actions.length,
             source: source.message.id,
+            event: source.event_call,
         })
     }
 }
