@@ -398,6 +398,8 @@ module.exports = class Bot extends EventEmitter {
                         action,
                         skipped: true,
                         numActions: actions.length,
+                        source: source.message.id,
+                        event: source.event_call,
                     })
                     continue
                 }
@@ -424,6 +426,8 @@ module.exports = class Bot extends EventEmitter {
                 action,
                 skipped: false,
                 numActions: actions.length,
+                source: source.message.id,
+                event: source.event_call,
             })
         }
     }
