@@ -465,7 +465,7 @@ module.exports = class Bot extends EventEmitter {
         }
     }
 
-    makeResolvable(map) {
+    makeResolvable = map => {
         const resolveKey = key => {
             if (typeof map[key] === 'undefined') {
                 throw `action option '${key}' is missing`
