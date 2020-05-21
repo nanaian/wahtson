@@ -139,7 +139,7 @@ module.exports = {
 
                 if (await state.config.has('purchases')) {
                     if (!source.member) return // Not a member of the server
-                    
+
                     send = require('./bot.js').send
                     send({
                         type: 'INFO',
