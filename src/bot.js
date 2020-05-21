@@ -251,7 +251,7 @@ module.exports = class Bot extends EventEmitter {
             driver: Database,
         })
         await this.db.migrate({
-            migrationsPath: __dirname+'\\..\\migrations'
+            migrationsPath: __dirname + '\\..\\migrations',
         })
 
         const p = new Promise((resolve, reject) => {
