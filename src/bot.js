@@ -24,9 +24,9 @@ module.exports = {
     Wahtson: class Bot extends EventEmitter {
         constructor(botOptions) {
             super()
-            this.botOptions = botOptions || {
-                configPath: path.join(__dirname, '../config.toml'),
-                dbPath: path.join(__dirname, '../database.sqlite'),
+            this.botOptions = {
+                configPath: botOptions.configPath || path.join(__dirname, '../config.toml'),
+                dbPath: botOptions.dbPath || path.join(__dirname, '../database.sqlite'),
             }
             this.version = version
 
@@ -154,7 +154,7 @@ client.on('guildMemberAdd', async member => {
     if (!guild) return
     if (member.guild.id !== guild.id) return
 
-    send({ type: 'INFO', text: `@${member.displayName} joined`, cyan })
+    send({ type: 'INFO', text: `@${member.displayName} joined` })
 
     await executeActionChain(await config.get('on_new_member'), {
         event_call: 'on_new_member',

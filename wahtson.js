@@ -1,6 +1,6 @@
 const chalk = require('chalk')
 const open = require('open')
-const { Wahtson, log_level } = require('./src/bot.js')
+const { Wahtson } = require('./src/bot.js')
 let bot = new Wahtson()
 
 process.title = `WAHtson ${bot.version}`

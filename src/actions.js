@@ -6,7 +6,7 @@ const {
     getBalance,
 } = require('./util.js')
 
-const { send } = require('./bot.js')
+let { send } = require('./bot.js')
 
 module.exports = {
     // Sends a message (option: 'text') to the source channel.
@@ -139,7 +139,8 @@ module.exports = {
 
                 if (await state.config.has('purchases')) {
                     if (!source.member) return // Not a member of the server
-
+                    
+                    send = require('./bot.js').send
                     send({
                         type: 'INFO',
                         text: `@${source.member.displayName} purchased: ${opts.getText('item')}`,
