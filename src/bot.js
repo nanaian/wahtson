@@ -7,7 +7,7 @@ const shortEmoji = require('emoji-to-short-name')
 const path = require('path')
 
 const config = require('./config.js')
-const { safeToString, placeholdersInOpts, sleep, userHasItem } = require('./util.js')
+const { safeToString, placeholdersInOpts, multiOption, sleep, userHasItem } = require('./util.js')
 const actionFunctions = require('./actions.js')
 const conditionFunctions = require('./conditions.js')
 const { version } = require('../package.json')
@@ -356,6 +356,10 @@ module.exports = class Bot extends EventEmitter {
                     }
                 }
             }
+            for (const [key, value] of Object.entries(action)) {
+                action[key] = multiOption(value)
+            }
+
             action = await placeholdersInOpts(action, source)
 
             if (action.when) {

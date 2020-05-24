@@ -191,6 +191,19 @@ const strToEmoji = target => {
     return emoji
 }
 
+const multiOption = value => {
+    if (typeof value == 'object' && value.type == 'MULTI') {
+        let choices = []
+        for (let i = 0; i < value.choices.length; i++) {
+            for (let r = 0; r < (value.weights[i] || 1); r++) {
+                choices.push(value.choices[i])
+            }
+        }
+        return choices[Math.floor(Math.random() * choices.length)]
+    }
+    return value
+}
+
 module.exports = {
     sleep,
     timeObjToMs,
@@ -202,6 +215,7 @@ module.exports = {
     handlePlaceholders,
     replacePlaceholders,
     placeholdersInOpts,
+    multiOption,
 
     escapeMarkdown,
     attachmentType,
