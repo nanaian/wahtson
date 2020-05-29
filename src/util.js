@@ -103,7 +103,7 @@ async function userHasItem(id, item, db) {
 const handlePlaceholders = (str, objs = {}) => {
     if (objs.source.args) str = replaceArgPlaceholders(str, objs.source.args)
     if (objs.source) str = replaceEventPlaceholders(str, objs.source)
-    
+
     if (objs.globalPlaceholders) str = replaceOptsPlaceholders(str, objs.globalPlaceholders, '$g_')
     if (objs.event_config) str = replaceOptsPlaceholders(str, objs.event_config, '$e_')
     if (objs.opts) str = replaceOptsPlaceholders(str, objs.opts)
@@ -144,16 +144,31 @@ const placeholdersInOpts = (opts, source, event_config, globalPlaceholders) => {
     const newOpts = opts
     for (key in opts) {
         if (typeof opts[key] == 'string') {
-            newOpts[key] = handlePlaceholders(opts[key].toString(), { opts: opts, source: source, event_config: event_config, globalPlaceholders: globalPlaceholders })
+            newOpts[key] = handlePlaceholders(opts[key].toString(), {
+                opts: opts,
+                source: source,
+                event_config: event_config,
+                globalPlaceholders: globalPlaceholders,
+            })
         }
         if (typeof opts[key] == 'number') {
             newOpts[key] = Number(
-                handlePlaceholders(opts[key].toString(), { opts: opts, source: source, event_config: event_config, globalPlaceholders: globalPlaceholders }),
+                handlePlaceholders(opts[key].toString(), {
+                    opts: opts,
+                    source: source,
+                    event_config: event_config,
+                    globalPlaceholders: globalPlaceholders,
+                }),
             )
         }
         if (typeof opts[key] == 'object') {
             newOpts[key] = JSON.parse(
-                handlePlaceholders(JSON.stringify(opts[key]), { opts: opts, source: source, event_config: event_config, globalPlaceholders: globalPlaceholders }),
+                handlePlaceholders(JSON.stringify(opts[key]), {
+                    opts: opts,
+                    source: source,
+                    event_config: event_config,
+                    globalPlaceholders: globalPlaceholders,
+                }),
             )
         }
     }

@@ -368,8 +368,10 @@ module.exports = class Bot extends EventEmitter {
                 event_config[key] = multiOption(value)
             }
             let globalPlaceholders = {}
-            if(state.config.has('placeholders')) {
-                globalPlaceholders = JSON.parse(JSON.stringify(await state.config.get('placeholders')))
+            if (state.config.has('placeholders')) {
+                globalPlaceholders = JSON.parse(
+                    JSON.stringify(await state.config.get('placeholders')),
+                )
                 for (const [key, value] of Object.entries(globalPlaceholders)) {
                     globalPlaceholders[key] = multiOption(value)
                 }
