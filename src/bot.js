@@ -345,7 +345,7 @@ module.exports = class Bot extends EventEmitter {
             executeActionChain: this.executeActionChain,
             avatar: this.client.user.displayAvatarURL(),
         }
-        
+
         //Parsing multi options for the event (done here so that they are unique to each event call)
         let eventConfig = JSON.parse(JSON.stringify(source.eventConfig))
         for (const [key, value] of Object.entries(eventConfig)) {
@@ -353,7 +353,7 @@ module.exports = class Bot extends EventEmitter {
         }
         //Parsing multi options for global placeholders (done here so that they are unique to each event call)
         let globalPlaceholders = {}
-        if(state.config.has('placeholders')) {
+        if (state.config.has('placeholders')) {
             globalPlaceholders = JSON.parse(JSON.stringify(await state.config.get('placeholders')))
             for (const [key, value] of Object.entries(globalPlaceholders)) {
                 globalPlaceholders[key] = multiOption(value)
@@ -379,7 +379,7 @@ module.exports = class Bot extends EventEmitter {
             for (const [key, value] of Object.entries(action)) {
                 action[key] = multiOption(value)
             }
-            
+
             action = await placeholdersInOpts(action, source, eventConfig, globalPlaceholders)
 
             if (action.when) {
