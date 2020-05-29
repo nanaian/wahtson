@@ -65,7 +65,7 @@ module.exports = class Bot extends EventEmitter {
                             channel: msg.channel,
                             member: msg.member,
                             command: null,
-                            limitLog: (await this.config.get('on_message')).limit_log,
+                            event_config: await this.config.get('on_message'),
                             args: [],
                         })
                     } else {
@@ -85,7 +85,7 @@ module.exports = class Bot extends EventEmitter {
                                 channel: msg.channel,
                                 member: member,
                                 command: commandString,
-                                limitLog: commandConfig.limit_log,
+                                event_config: await commandConfig,
                                 args: args.filter(el => el != ''),
                             })
                         } else if (await this.config.has('on_unknown_command')) {
@@ -97,6 +97,7 @@ module.exports = class Bot extends EventEmitter {
                                     channel: msg.channel,
                                     member: member,
                                     command: commandString,
+                                    event_config: await this.config.get('on_unknown_command'),
                                     args: args.filter(el => el != ''),
                                 },
                             )
@@ -123,6 +124,7 @@ module.exports = class Bot extends EventEmitter {
                     channel: null,
                     member,
                     command: null,
+                    event_config: await this.config.get('on_new_member'),
                     args: [],
                 })
             }),
@@ -200,6 +202,7 @@ module.exports = class Bot extends EventEmitter {
                                 channel: reaction.message.channel,
                                 member,
                                 command: null,
+                                event_config: await rConfig,
                                 args: [],
                             })
                         }
@@ -237,6 +240,7 @@ module.exports = class Bot extends EventEmitter {
                                 channel: reaction.message.channel,
                                 member,
                                 command: null,
+                                event_config: await rConfig,
                                 args: [],
                             })
                         }
@@ -359,8 +363,19 @@ module.exports = class Bot extends EventEmitter {
             for (const [key, value] of Object.entries(action)) {
                 action[key] = multiOption(value)
             }
+            let event_config = JSON.parse(JSON.stringify(source.event_config))
+            for (const [key, value] of Object.entries(event_config)) {
+                event_config[key] = multiOption(value)
+            }
+            let globalPlaceholders = {}
+            if(state.config.has('placeholders')) {
+                globalPlaceholders = JSON.parse(JSON.stringify(await state.config.get('placeholders')))
+                for (const [key, value] of Object.entries(globalPlaceholders)) {
+                    globalPlaceholders[key] = multiOption(value)
+                }
+            }
 
-            action = await placeholdersInOpts(action, source)
+            action = await placeholdersInOpts(action, source, event_config, globalPlaceholders)
 
             if (action.when) {
                 const conditions = Array.isArray(action.when) ? action.when : [action.when]
@@ -466,6 +481,7 @@ module.exports = class Bot extends EventEmitter {
                     channel: reaction.message.channel,
                     member: reaction.message.member,
                     command: null,
+                    event_config: await await pinConfig,
                     args: [],
                 })
             }
@@ -486,6 +502,10 @@ module.exports = class Bot extends EventEmitter {
 
             has: key => {
                 return map.hasOwnProperty(key)
+            },
+
+            getRaw: key => {
+                return map[key]
             },
 
             getString: key => {
