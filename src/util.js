@@ -105,7 +105,7 @@ const handlePlaceholders = (str, objs = {}) => {
     if (objs.source) str = replaceEventPlaceholders(str, objs.source)
     
     if (objs.globalPlaceholders) str = replaceOptsPlaceholders(str, objs.globalPlaceholders, '$g_')
-    if (objs.event_config) str = replaceOptsPlaceholders(str, objs.event_config, '$e_')
+    if (objs.eventConfig) str = replaceOptsPlaceholders(str, objs.eventConfig, '$e_')
     if (objs.opts) str = replaceOptsPlaceholders(str, objs.opts)
     return str
 }
@@ -123,7 +123,7 @@ const replaceArgPlaceholders = (str, args) => {
 const replaceEventPlaceholders = (str, source) => {
     var keys = Object.keys(source)
     keys.forEach(key => {
-        if (key == 'args' || key == 'event_config') return
+        if (key == 'args' || key == 'eventConfig') return
         const re = new RegExp(escapeRegexSpecialChars('$:' + key), 'g')
         str = str.replace(re, source[key])
     })
@@ -140,20 +140,20 @@ const replaceOptsPlaceholders = (str, opts, prefix = '$_') => {
     return str
 }
 
-const placeholdersInOpts = (opts, source, event_config, globalPlaceholders) => {
+const placeholdersInOpts = (opts, source, eventConfig, globalPlaceholders) => {
     const newOpts = opts
     for (key in opts) {
         if (typeof opts[key] == 'string') {
-            newOpts[key] = handlePlaceholders(opts[key].toString(), { opts: opts, source: source, event_config: event_config, globalPlaceholders: globalPlaceholders })
+            newOpts[key] = handlePlaceholders(opts[key].toString(), { opts: opts, source: source, eventConfig: eventConfig, globalPlaceholders: globalPlaceholders })
         }
         if (typeof opts[key] == 'number') {
             newOpts[key] = Number(
-                handlePlaceholders(opts[key].toString(), { opts: opts, source: source, event_config: event_config, globalPlaceholders: globalPlaceholders }),
+                handlePlaceholders(opts[key].toString(), { opts: opts, source: source, eventConfig: eventConfig, globalPlaceholders: globalPlaceholders }),
             )
         }
         if (typeof opts[key] == 'object') {
             newOpts[key] = JSON.parse(
-                handlePlaceholders(JSON.stringify(opts[key]), { opts: opts, source: source, event_config: event_config, globalPlaceholders: globalPlaceholders }),
+                handlePlaceholders(JSON.stringify(opts[key]), { opts: opts, source: source, eventConfig: eventConfig, globalPlaceholders: globalPlaceholders }),
             )
         }
     }

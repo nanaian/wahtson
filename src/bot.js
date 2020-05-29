@@ -65,7 +65,7 @@ module.exports = class Bot extends EventEmitter {
                             channel: msg.channel,
                             member: msg.member,
                             command: null,
-                            event_config: await this.config.get('on_message'),
+                            eventConfig: await this.config.get('on_message'),
                             args: [],
                         })
                     } else {
@@ -85,7 +85,7 @@ module.exports = class Bot extends EventEmitter {
                                 channel: msg.channel,
                                 member: member,
                                 command: commandString,
-                                event_config: await commandConfig,
+                                eventConfig: await commandConfig,
                                 args: args.filter(el => el != ''),
                             })
                         } else if (await this.config.has('on_unknown_command')) {
@@ -97,7 +97,7 @@ module.exports = class Bot extends EventEmitter {
                                     channel: msg.channel,
                                     member: member,
                                     command: commandString,
-                                    event_config: await this.config.get('on_unknown_command'),
+                                    eventConfig: await this.config.get('on_unknown_command'),
                                     args: args.filter(el => el != ''),
                                 },
                             )
@@ -124,7 +124,7 @@ module.exports = class Bot extends EventEmitter {
                     channel: null,
                     member,
                     command: null,
-                    event_config: await this.config.get('on_new_member'),
+                    eventConfig: await this.config.get('on_new_member'),
                     args: [],
                 })
             }),
@@ -202,7 +202,7 @@ module.exports = class Bot extends EventEmitter {
                                 channel: reaction.message.channel,
                                 member,
                                 command: null,
-                                event_config: await rConfig,
+                                eventConfig: await rConfig,
                                 args: [],
                             })
                         }
@@ -240,7 +240,7 @@ module.exports = class Bot extends EventEmitter {
                                 channel: reaction.message.channel,
                                 member,
                                 command: null,
-                                event_config: await rConfig,
+                                eventConfig: await rConfig,
                                 args: [],
                             })
                         }
@@ -345,6 +345,20 @@ module.exports = class Bot extends EventEmitter {
             executeActionChain: this.executeActionChain,
             avatar: this.client.user.displayAvatarURL(),
         }
+        
+        //Parsing multi options for the event (done here so that they are unique to each event call)
+        let eventConfig = JSON.parse(JSON.stringify(source.eventConfig))
+        for (const [key, value] of Object.entries(eventConfig)) {
+            eventConfig[key] = multiOption(value)
+        }
+        //Parsing multi options for global placeholders (done here so that they are unique to each event call)
+        let globalPlaceholders = {}
+        if(state.config.has('placeholders')) {
+            globalPlaceholders = JSON.parse(JSON.stringify(await state.config.get('placeholders')))
+            for (const [key, value] of Object.entries(globalPlaceholders)) {
+                globalPlaceholders[key] = multiOption(value)
+            }
+        }
 
         for (let idx = 0; idx < actions.length; idx++) {
             let action = JSON.parse(JSON.stringify(actions[idx]))
@@ -360,22 +374,13 @@ module.exports = class Bot extends EventEmitter {
                     }
                 }
             }
+
+            //Parsing multi options for the action (done here so that they are unique to each event call)
             for (const [key, value] of Object.entries(action)) {
                 action[key] = multiOption(value)
             }
-            let event_config = JSON.parse(JSON.stringify(source.event_config))
-            for (const [key, value] of Object.entries(event_config)) {
-                event_config[key] = multiOption(value)
-            }
-            let globalPlaceholders = {}
-            if(state.config.has('placeholders')) {
-                globalPlaceholders = JSON.parse(JSON.stringify(await state.config.get('placeholders')))
-                for (const [key, value] of Object.entries(globalPlaceholders)) {
-                    globalPlaceholders[key] = multiOption(value)
-                }
-            }
-
-            action = await placeholdersInOpts(action, source, event_config, globalPlaceholders)
+            
+            action = await placeholdersInOpts(action, source, eventConfig, globalPlaceholders)
 
             if (action.when) {
                 const conditions = Array.isArray(action.when) ? action.when : [action.when]
@@ -481,7 +486,7 @@ module.exports = class Bot extends EventEmitter {
                     channel: reaction.message.channel,
                     member: reaction.message.member,
                     command: null,
-                    event_config: await await pinConfig,
+                    eventConfig: await pinConfig,
                     args: [],
                 })
             }
@@ -504,9 +509,7 @@ module.exports = class Bot extends EventEmitter {
                 return map.hasOwnProperty(key)
             },
 
-            getRaw: key => {
-                return map[key]
-            },
+            getRaw: key => map[key],
 
             getString: key => {
                 return safeToString(resolveKey(key))
