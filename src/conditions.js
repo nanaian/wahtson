@@ -79,7 +79,6 @@ module.exports = {
     async OPTION_EQUALS(source, opts, state, action) {
         const target = await opts.getText('value')
         const option = await action.getRaw(opts.getText('key'))
-        console.log(option)
         return target != undefined && option == target
     },
     async ARG_TYPE(source, opts, state) {

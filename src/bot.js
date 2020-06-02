@@ -7,7 +7,14 @@ const shortEmoji = require('emoji-to-short-name')
 const path = require('path')
 
 const config = require('./config.js')
-const { safeToString, placeholdersInOpts, multiOption, sleep, userHasItem } = require('./util.js')
+const {
+    safeToString,
+    placeholdersInOpts,
+    multiOption,
+    mathOption,
+    sleep,
+    userHasItem,
+} = require('./util.js')
 const actionFunctions = require('./actions.js')
 const conditionFunctions = require('./conditions.js')
 const { version } = require('../package.json')
@@ -346,18 +353,31 @@ module.exports = class Bot extends EventEmitter {
             avatar: this.client.user.displayAvatarURL(),
         }
 
-        //Parsing multi options for the event (done here so that they are unique to each event call)
-        let eventConfig = JSON.parse(JSON.stringify(source.eventConfig))
-        for (const [key, value] of Object.entries(eventConfig)) {
-            eventConfig[key] = multiOption(value)
-        }
-        //Parsing multi options for global placeholders (done here so that they are unique to each event call)
+        //Parsing options for global placeholders (done here so that they are unique to each event call)
         let globalPlaceholders = {}
         if (await state.config.has('placeholders')) {
             globalPlaceholders = JSON.parse(JSON.stringify(await state.config.get('placeholders')))
             for (const [key, value] of Object.entries(globalPlaceholders)) {
                 globalPlaceholders[key] = multiOption(value)
+                globalPlaceholders[key] = mathOption(value)
             }
+        }
+
+        //Parsing options for the event (done here so that they are unique to each event call)
+        let eventConfig = JSON.parse(JSON.stringify(source.eventConfig))
+        for (const [key, value] of Object.entries(eventConfig)) {
+            if(key === 'action') return
+            eventConfig[key] = multiOption(value)
+            eventConfig[key] = JSON.parse(
+                placeholdersInOpts(
+                    JSON.stringify(eventConfig[key]),
+                    eventConfig,
+                    source,
+                    eventConfig,
+                    globalPlaceholders,
+                ),
+            )
+            eventConfig[key] = mathOption(eventConfig[key])
         }
 
         for (let idx = 0; idx < actions.length; idx++) {
@@ -375,12 +395,20 @@ module.exports = class Bot extends EventEmitter {
                 }
             }
 
-            //Parsing multi options for the action (done here so that they are unique to each event call)
+            //Parsing multi options and math operators for the action (done here so that they are unique to each event call)
             for (const [key, value] of Object.entries(action)) {
                 action[key] = multiOption(value)
+                action[key] = JSON.parse(
+                    placeholdersInOpts(
+                        JSON.stringify(action[key]),
+                        action,
+                        source,
+                        eventConfig,
+                        globalPlaceholders,
+                    ),
+                )
+                action[key] = mathOption(action[key])
             }
-
-            action = await placeholdersInOpts(action, source, eventConfig, globalPlaceholders)
 
             if (action.when) {
                 const conditions = Array.isArray(action.when) ? action.when : [action.when]
