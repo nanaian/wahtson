@@ -282,4 +282,37 @@ module.exports = {
     async DO_NOTHING() {
         /* DOES NOTHING, NOT A BUG. INTENDED FOR ACTION LOGIC PURPOSES. */
     },
+    
+    async TRANSFER_COINS(source, opts, state) {
+        const balanceFrom = await getBalance(opts.getMember('from').id, state)
+        const balanceTo = await getBalance(opts.getMember('to').id, state)
+
+        if(balanceFrom < opts.getNumber('amount')) {
+            if (opts.has('text_poor')) {
+                source.channel.send(opts.getText('text_poor'))
+            }
+        } else if (opts.getMember('to') === opts.getMember('from')) {
+            if (opts.has('text_self')) {
+                source.channel.send(opts.getText('text_self'))
+            }
+        } else {
+            if(opts.has('tax')) {
+                balanceFrom -= opts.getNumber('tax')
+            }
+            state.db.run(
+                'UPDATE users SET balance = ? WHERE id = ?',
+                balanceFrom - opts.getNumber('amount'),
+                opts.getMember('from').id,
+            )
+            state.db.run(
+                'UPDATE users SET balance = ? WHERE id = ?',
+                balanceTo + opts.getNumber('amount'),
+                opts.getMember('to').id,
+            )
+
+            if (opts.has('text_success')) {
+                source.channel.send(opts.getText('text_success'))
+            }
+        }
+    },
 }
