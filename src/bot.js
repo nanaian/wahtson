@@ -623,7 +623,10 @@ module.exports = class Bot extends EventEmitter {
                     )
                 } else {
                     // By ID
-                    member = this.guild.members.cache.find(m => m.id === raw)
+                    if(raw.startsWith('<@'))
+                        member = this.guild.members.cache.find(m => m.id === raw.replace('!', '').substring(2,20))
+                    else
+                        member = this.guild.members.cache.find(m => m.id === raw)
                 }
 
                 if (!member) {
