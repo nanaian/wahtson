@@ -123,8 +123,8 @@ module.exports = {
     },
 
     async GET_BALANCE(source, opts, state) {
-        const balance = await getBalance(source.member.id, state)
-        const placeholders = { $balance: balance }
+        const balance = await getBalance((opts.has('user') && opts.getRaw('user') != '') ? opts.getMember('user').id : source.member.id, state)
+        const placeholders = { $balance: balance, $user: ((opts.has('user') && opts.getRaw('user') != '') ? opts.getMember('user') : source.member) }
         source.channel.send(replacePlaceholders(opts.getText('text'), placeholders))
     },
 
