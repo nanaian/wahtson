@@ -123,8 +123,19 @@ module.exports = {
     },
 
     async GET_BALANCE(source, opts, state) {
-        const balance = await getBalance((opts.has('user') && opts.getRaw('user') != '') ? opts.getMember('user').id : source.member.id, state)
-        const placeholders = { $balance: balance, $user: ((opts.has('user') && opts.getRaw('user') != '') ? opts.getMember('user') : source.member) }
+        const balance = await getBalance(
+            opts.has('user') && opts.getRaw('user') != ''
+                ? opts.getMember('user').id
+                : source.member.id,
+            state,
+        )
+        const placeholders = {
+            $balance: balance,
+            $user:
+                opts.has('user') && opts.getRaw('user') != ''
+                    ? opts.getMember('user')
+                    : source.member,
+        }
         source.channel.send(replacePlaceholders(opts.getText('text'), placeholders))
     },
 
@@ -282,12 +293,12 @@ module.exports = {
     async DO_NOTHING() {
         /* DOES NOTHING, NOT A BUG. INTENDED FOR ACTION LOGIC PURPOSES. */
     },
-    
+
     async TRANSFER_COINS(source, opts, state) {
         const balanceFrom = await getBalance(opts.getMember('from').id, state)
         const balanceTo = await getBalance(opts.getMember('to').id, state)
 
-        if(balanceFrom < opts.getNumber('amount')) {
+        if (balanceFrom < opts.getNumber('amount')) {
             if (opts.has('text_poor')) {
                 source.channel.send(opts.getText('text_poor'))
             }
@@ -296,7 +307,7 @@ module.exports = {
                 source.channel.send(opts.getText('text_self'))
             }
         } else {
-            if(opts.has('tax')) {
+            if (opts.has('tax')) {
                 balanceFrom -= opts.getNumber('tax')
             }
             state.db.run(

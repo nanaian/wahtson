@@ -117,7 +117,7 @@ const replaceArgPlaceholders = (str, args) => {
         const re = new RegExp(escapeRegexSpecialChars('$arg' + i), 'g')
         str = str.replace(re, args[i])
     }
-    const reSpares = new RegExp(escapeRegexSpecialChars('$arg')+'[0-9]+', 'g')
+    const reSpares = new RegExp(escapeRegexSpecialChars('$arg') + '[0-9]+', 'g')
     str = str.replace(reSpares, '')
     return str
 }

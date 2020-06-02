@@ -366,7 +366,7 @@ module.exports = class Bot extends EventEmitter {
         //Parsing options for the event (done here so that they are unique to each event call)
         let eventConfig = JSON.parse(JSON.stringify(source.eventConfig))
         for (const [key, value] of Object.entries(eventConfig)) {
-            if(key === 'action') return
+            if (key === 'action') return
             eventConfig[key] = multiOption(value)
             eventConfig[key] = JSON.parse(
                 placeholdersInOpts(
@@ -623,10 +623,11 @@ module.exports = class Bot extends EventEmitter {
                     )
                 } else {
                     // By ID
-                    if(raw.startsWith('<@'))
-                        member = this.guild.members.cache.find(m => m.id === raw.replace('!', '').substring(2,20))
-                    else
-                        member = this.guild.members.cache.find(m => m.id === raw)
+                    if (raw.startsWith('<@'))
+                        member = this.guild.members.cache.find(
+                            m => m.id === raw.replace('!', '').substring(2, 20),
+                        )
+                    else member = this.guild.members.cache.find(m => m.id === raw)
                 }
 
                 if (!member) {
