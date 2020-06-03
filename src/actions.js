@@ -298,7 +298,12 @@ module.exports = {
         const balanceFrom = await getBalance(opts.getMember('from').id, state)
         const balanceTo = await getBalance(opts.getMember('to').id, state)
 
-        if (balanceFrom < opts.getNumber('amount')) {
+        let decuction = opts.getNumber('amount')
+        if (opts.has('tax')) {
+            decuction += opts.getNumber('tax')
+        }
+
+        if (balanceFrom < decuction) {
             if (opts.has('text_poor')) {
                 source.channel.send(opts.getText('text_poor'))
             }
@@ -306,13 +311,10 @@ module.exports = {
             if (opts.has('text_self')) {
                 source.channel.send(opts.getText('text_self'))
             }
-        } else {
-            if (opts.has('tax')) {
-                balanceFrom -= opts.getNumber('tax')
-            }
+        } else { 
             state.db.run(
                 'UPDATE users SET balance = ? WHERE id = ?',
-                balanceFrom - opts.getNumber('amount'),
+                balanceFrom - decuction,
                 opts.getMember('from').id,
             )
             state.db.run(
