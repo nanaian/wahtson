@@ -4,6 +4,9 @@ const {
     attachmentType,
     escapeMarkdown,
     getBalance,
+    timeObjToMs,
+    storeSchedule,
+    removeSchedule,
 } = require('./util.js')
 
 module.exports = {
@@ -178,10 +181,13 @@ module.exports = {
 
                     if (purchaseConfig) {
                         await state.executeActionChain(purchaseConfig.actions, {
+                            event_call: 'purchase',
                             message: source.message,
-                            channel: source.channel,
-                            member: source.member,
-                            command: source.command,
+                            channel: source.message.channel,
+                            member: source.message.member,
+                            command: null,
+                            eventConfig: opts,
+                            args: [],
                         })
                     }
                 }
@@ -311,7 +317,7 @@ module.exports = {
             if (opts.has('text_self')) {
                 source.channel.send(opts.getText('text_self'))
             }
-        } else { 
+        } else {
             state.db.run(
                 'UPDATE users SET balance = ? WHERE id = ?',
                 balanceFrom - decuction,
@@ -327,5 +333,56 @@ module.exports = {
                 source.channel.send(opts.getText('text_success'))
             }
         }
+    },
+
+    async WEBHOOK(source, opts, state) {
+        const webhookOpts = await state.config.get('webhook')
+        const webhookComponents = webhookOpts.webhook_url
+            .replace('https://discordapp.com/api/webhooks/', '')
+            .split('/')
+        const webhook = await (await source.message.guild.fetchWebhooks()).get(webhookComponents[0])
+
+        await webhook.edit({
+            channel: source.channel.id,
+        })
+
+        webhook.send({
+            username: opts.has('display_name')
+                ? opts.getText('display_name')
+                : webhookOpts.default_display_name,
+            avatarURL: opts.has('avatar_url')
+                ? opts.getText('avatar_url')
+                : webhookOpts.default_avatar_url,
+
+            content: opts.has('text') ? opts.getText('text') : '',
+            embeds: opts.has('embeds') ? opts.getRaw('embeds') : [],
+        })
+    },
+
+    async SCHEDULE(source, opts, state) {
+        const actions = await opts.getRaw('scheduled')
+
+        let runTime = timeObjToMs(opts.getText('time'))
+
+        source.event_call = 'schedule'
+
+        await storeSchedule(state.db, actions, source, runTime)
+
+        setTimeout(async () => {
+            state.executeActionChain(actions, source)
+
+            let compressedSource = JSON.parse(JSON.stringify(source))
+
+            compressedSource.channel = source.channel.id
+            compressedSource.member = source.member.id
+            compressedSource.message = source.message.id
+            compressedSource.isGuild = source.channel.guild != undefined
+
+            removeSchedule(state.db, {
+                actions,
+                compressedSource,
+                runTime,
+            })
+        }, runTime)
     },
 }
