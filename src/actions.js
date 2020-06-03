@@ -311,7 +311,7 @@ module.exports = {
             if (opts.has('text_self')) {
                 source.channel.send(opts.getText('text_self'))
             }
-        } else { 
+        } else {
             state.db.run(
                 'UPDATE users SET balance = ? WHERE id = ?',
                 balanceFrom - decuction,
