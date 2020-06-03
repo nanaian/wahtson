@@ -245,11 +245,39 @@ const mathOption = value => {
     return value
 }
 
+const storeSchedule = async (db, actions, source, runTime) => {
+    if (actions.length) {
+        let compressedSource = JSON.parse(JSON.stringify(source))
+
+        compressedSource.channel = source.channel.id
+        compressedSource.member = source.member.id
+        compressedSource.message = source.message.id
+        compressedSource.isGuild = source.channel.guild != undefined
+
+        await db.run(
+            'INSERT INTO schedules (actions, source, runTime) VALUES (?, ?, ?)',
+            JSON.stringify(actions),
+            JSON.stringify(compressedSource),
+            Date.now() + runTime,
+        )
+    }
+}
+const removeSchedule = async (db, schedule) => {
+    await db.run(
+        'DELETE FROM schedules WHERE actions = ? AND source = ? AND runTime = ?',
+        schedule.actions,
+        schedule.source,
+        schedule.runTime,
+    )
+}
+
 module.exports = {
     sleep,
     timeObjToMs,
     checkCooldown,
     uniqueArray,
+    storeSchedule,
+    removeSchedule,
 
     strToEmoji,
     safeToString,

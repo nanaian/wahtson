@@ -14,6 +14,7 @@ const {
     mathOption,
     sleep,
     userHasItem,
+    removeSchedule,
 } = require('./util.js')
 const actionFunctions = require('./actions.js')
 const conditionFunctions = require('./conditions.js')
@@ -70,7 +71,7 @@ module.exports = class Bot extends EventEmitter {
                             event_call: 'on_message',
                             message: msg,
                             channel: msg.channel,
-                            member: msg.member,
+                            member: member,
                             command: null,
                             eventConfig: await this.config.get('on_message'),
                             args: [],
@@ -304,6 +305,39 @@ module.exports = class Bot extends EventEmitter {
                     level: Bot.logLevel.INFO,
                     text: 'Server found. Listening for commands...',
                 })
+
+                const schedules = await this.db.all('SELECT * FROM schedules')
+                for (const schedule of schedules) {
+                    setTimeout(async () => {
+                        let uncompressedSource = JSON.parse(schedule.source)
+
+                        if (uncompressedSource.isGuild) {
+                            uncompressedSource.channel = this.guild.channels.resolve(
+                                uncompressedSource.channel,
+                            )
+                            uncompressedSource.member = this.guild.members.resolve(
+                                uncompressedSource.member,
+                            )
+                            uncompressedSource.message = await uncompressedSource.channel.messages.fetch(
+                                uncompressedSource.message,
+                            )
+                        } else {
+                            uncompressedSource.member = await this.client.users.fetch(
+                                uncompressedSource.member,
+                            )
+                            uncompressedSource.channel = await this.client.channels.fetch(
+                                uncompressedSource.channel,
+                            )
+                            uncompressedSource.message = await uncompressedSource.channel.messages.fetch(
+                                uncompressedSource.message,
+                            )
+                        }
+
+                        this.executeActionChain(JSON.parse(schedule.actions), uncompressedSource)
+                        removeSchedule(this.db, schedule)
+                    }, schedule.runTime - Date.now())
+                }
+
                 resolve()
             })
         })
@@ -344,7 +378,7 @@ module.exports = class Bot extends EventEmitter {
         }
     }
 
-    async executeActionChain(actions, source) {
+    executeActionChain = async (actions, source) => {
         let state = {
             previousActionsSkipped: [false],
             db: this.db,
