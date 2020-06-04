@@ -228,7 +228,7 @@ module.exports = class Bot extends EventEmitter {
                 const member = await this.guild.members.fetch(user)
 
                 if (await this.config.has('reactions')) {
-                    for (const rConfig of await config.get('reactions')) {
+                    for (const rConfig of await this.config.get('reactions')) {
                         if (rConfig.message && rConfig.message !== reaction.message.id) {
                             continue
                         }
