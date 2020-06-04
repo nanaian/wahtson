@@ -471,6 +471,7 @@ module.exports = class Bot extends EventEmitter {
                             this.makeResolvable(condition),
                             state,
                             this.makeResolvable(action),
+                            action,
                         )
                     } catch (err) {
                         this.emit('log', { level: Bot.logLevel.ERROR, text: err.toString() })
