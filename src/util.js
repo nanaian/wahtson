@@ -245,7 +245,7 @@ const mathOption = value => {
     return value
 }
 
-const storeSchedule = async (db, actions, source, runTime) => {
+const storeSchedule = async (db, actions, source, runTime, cancelIfPassed) => {
     if (actions.length) {
         let compressedSource = JSON.parse(JSON.stringify(source))
 
@@ -253,6 +253,7 @@ const storeSchedule = async (db, actions, source, runTime) => {
         compressedSource.member = source.member.id
         compressedSource.message = source.message.id
         compressedSource.isGuild = source.channel.guild != undefined
+        compressedSource.cancelIfPassed = cancelIfPassed
 
         await db.run(
             'INSERT INTO schedules (actions, source, runTime) VALUES (?, ?, ?)',

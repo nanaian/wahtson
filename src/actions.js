@@ -336,6 +336,7 @@ module.exports = {
     },
 
     async WEBHOOK(source, opts, state) {
+        const channel = opts.has('to') ? opts.getChannel('to') : source.channel
         const webhookOpts = await state.config.get('webhook')
         const webhookComponents = (opts.has('webhook_url')
             ? opts.getText('webhook_url')
@@ -346,7 +347,7 @@ module.exports = {
         const webhook = await (await source.message.guild.fetchWebhooks()).get(webhookComponents[0])
 
         await webhook.edit({
-            channel: source.channel.id,
+            channel: channel.id,
         })
 
         webhook.send({

@@ -308,8 +308,12 @@ module.exports = class Bot extends EventEmitter {
 
                 const schedules = await this.db.all('SELECT * FROM schedules')
                 for (const schedule of schedules) {
+                    let uncompressedSource = JSON.parse(schedule.source)
+                    if(uncompressedSource.cancelIfPassed && schedule.runTime < Date.now()) {
+                        removeSchedule(this.db, schedule)
+                        return
+                    }
                     setTimeout(async () => {
-                        let uncompressedSource = JSON.parse(schedule.source)
 
                         if (uncompressedSource.isGuild) {
                             uncompressedSource.channel = this.guild.channels.resolve(
@@ -508,9 +512,20 @@ module.exports = class Bot extends EventEmitter {
                 continue
             }
 
-            await fn(source, this.makeResolvable(action), state).catch(err => {
+            let actionResult = await fn(source, this.makeResolvable(action), state, idx).catch(err => {
                 this.emit('log', { level: Bot.logLevel.ERROR, text: err.toString() })
             })
+            if(actionResult === false) {
+                this.emit('action', {
+                    index: idx,
+                    action,
+                    skipped: false,
+                    numActions: idx+1,
+                    source: source.message.id,
+                    event: source.event_call,
+                })
+                return
+            }
 
             state.previousActionsSkipped.push(false)
 
