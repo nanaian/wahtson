@@ -71,7 +71,7 @@ module.exports = class Bot extends EventEmitter {
                             event_call: 'on_message',
                             message: msg,
                             channel: msg.channel,
-                            member: member,
+                            member,
                             command: null,
                             eventConfig: await this.config.get('on_message'),
                             args: [],
