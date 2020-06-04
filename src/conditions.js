@@ -1,4 +1,11 @@
-const { strToEmoji, getBalance, checkCooldown, timeObjToMs, timeDiffString, replacePlaceholders } = require('./util.js')
+const {
+    strToEmoji,
+    getBalance,
+    checkCooldown,
+    timeObjToMs,
+    timeDiffString,
+    replacePlaceholders,
+} = require('./util.js')
 
 module.exports = {
     // Skips the action if the source user does not have the given role (option: 'role').
@@ -62,14 +69,17 @@ module.exports = {
 
         const now = Date.now()
 
-        const placeholders = { '$remaining': timeDiffString(timeRequired, now - lastUsed) }
+        const placeholders = { $remaining: timeDiffString(timeRequired, now - lastUsed) }
 
-        for(const [key, value] of Object.entries(action)) {
-            if (typeof value == 'object') action[key] = JSON.parse(await replacePlaceholders(JSON.stringify(value), placeholders))
+        for (const [key, value] of Object.entries(action)) {
+            if (typeof value == 'object')
+                action[key] = JSON.parse(
+                    await replacePlaceholders(JSON.stringify(value), placeholders),
+                )
             else action[key] = await replacePlaceholders(value, placeholders)
         }
 
-        return (now - lastUsed > timeRequired)
+        return now - lastUsed > timeRequired
     },
 
     async HAS_ARGS(source, opts, state) {

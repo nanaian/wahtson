@@ -364,14 +364,20 @@ module.exports = {
     },
 
     async SCHEDULE(source, opts, state, idx) {
-        const actions = await source.eventConfig.actions.slice(idx+1)
-        
+        const actions = await source.eventConfig.actions.slice(idx + 1)
+
         let runTime = timeObjToMs(opts.getText('time'))
 
         source.event_call = 'schedule'
         source.eventConfig.actions = actions
 
-        await storeSchedule(state.db, actions, source, runTime, opts.getBoolean('cancel_if_passed', true))
+        await storeSchedule(
+            state.db,
+            actions,
+            source,
+            runTime,
+            opts.getBoolean('cancel_if_passed', true),
+        )
 
         setTimeout(async () => {
             state.executeActionChain(actions, source)
@@ -389,7 +395,7 @@ module.exports = {
                 runTime,
             })
         }, runTime)
-        
+
         return false
     },
 }

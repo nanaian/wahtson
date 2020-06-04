@@ -273,7 +273,7 @@ const removeSchedule = async (db, schedule) => {
 }
 
 const timeDiffString = (first, last) => {
-    const diff = Math.round(first-last)
+    const diff = Math.round(first - last)
 
     const CONV = {
         YEAR: 31536000000,
@@ -287,30 +287,30 @@ const timeDiffString = (first, last) => {
     let amount
     let str
 
-    switch(true) {
-        case (diff >= CONV.YEAR):
+    switch (true) {
+        case diff >= CONV.YEAR:
             str = 'year'
-            amount = Math.round(diff/CONV.YEAR)
+            amount = Math.round(diff / CONV.YEAR)
             break
-        case (diff >= CONV.MONTH):
+        case diff >= CONV.MONTH:
             str = 'month'
-            amount = Math.round(diff/CONV.MONTH)
+            amount = Math.round(diff / CONV.MONTH)
             break
-        case (diff >= CONV.DAY):
+        case diff >= CONV.DAY:
             str = 'day'
-            amount = Math.round(diff/CONV.DAY)
+            amount = Math.round(diff / CONV.DAY)
             break
-        case (diff >= CONV.HOUR):
+        case diff >= CONV.HOUR:
             str = 'hour'
-            amount = Math.round(diff/CONV.HOUR)
+            amount = Math.round(diff / CONV.HOUR)
             break
-        case (diff >= CONV.MINUTE):
+        case diff >= CONV.MINUTE:
             str = 'minute'
-            amount = Math.round(diff/CONV.MINUTE)
+            amount = Math.round(diff / CONV.MINUTE)
             break
-        case (diff >= CONV.SECOND):
+        case diff >= CONV.SECOND:
             str = 'second'
-            amount = Math.round(diff/CONV.SECOND)
+            amount = Math.round(diff / CONV.SECOND)
             break
     }
 
