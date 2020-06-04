@@ -175,4 +175,7 @@ module.exports = {
             }, timeObjToMs(opts.getText('time')))
         })
     },
+    async IS_DM(source, opts, state) {
+        return source.channel.type == 'dm'
+    },
 }
