@@ -337,7 +337,10 @@ module.exports = {
 
     async WEBHOOK(source, opts, state) {
         const webhookOpts = await state.config.get('webhook')
-        const webhookComponents = (opts.has('webhook_url') ? opts.getText('webhook_url') : webhookOpts.default_webhook_url)
+        const webhookComponents = (opts.has('webhook_url')
+            ? opts.getText('webhook_url')
+            : webhookOpts.default_webhook_url
+        )
             .replace('https://discordapp.com/api/webhooks/', '')
             .split('/')
         const webhook = await (await source.message.guild.fetchWebhooks()).get(webhookComponents[0])
