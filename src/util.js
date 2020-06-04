@@ -272,9 +272,55 @@ const removeSchedule = async (db, schedule) => {
     )
 }
 
+const timeDiffString = (first, last) => {
+    const diff = Math.round(first-last)
+
+    const CONV = {
+        YEAR: 31536000000,
+        MONTH: 2629800000,
+        DAY: 86400000,
+        HOUR: 3600000,
+        MINUTE: 60000,
+        SECOND: 1000,
+    }
+
+    let amount
+    let str
+
+    switch(true) {
+        case (diff >= CONV.YEAR):
+            str = 'year'
+            amount = Math.round(diff/CONV.YEAR)
+            break
+        case (diff >= CONV.MONTH):
+            str = 'month'
+            amount = Math.round(diff/CONV.MONTH)
+            break
+        case (diff >= CONV.DAY):
+            str = 'day'
+            amount = Math.round(diff/CONV.DAY)
+            break
+        case (diff >= CONV.HOUR):
+            str = 'hour'
+            amount = Math.round(diff/CONV.HOUR)
+            break
+        case (diff >= CONV.MINUTE):
+            str = 'minute'
+            amount = Math.round(diff/CONV.MINUTE)
+            break
+        case (diff >= CONV.SECOND):
+            str = 'second'
+            amount = Math.round(diff/CONV.SECOND)
+            break
+    }
+
+    return String(amount) + ' ' + str + (amount == 1 ? '' : 's')
+}
+
 module.exports = {
     sleep,
     timeObjToMs,
+    timeDiffString,
     checkCooldown,
     uniqueArray,
     storeSchedule,

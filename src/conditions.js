@@ -1,5 +1,4 @@
-const chalk = require('chalk')
-const { strToEmoji, getBalance, checkCooldown, timeObjToMs } = require('./util.js')
+const { strToEmoji, getBalance, checkCooldown, timeObjToMs, timeDiffString, replacePlaceholders } = require('./util.js')
 
 module.exports = {
     // Skips the action if the source user does not have the given role (option: 'role').
@@ -50,7 +49,7 @@ module.exports = {
         return purchase != undefined
     },
 
-    async TIME_SINCE(source, opts, state) {
+    async TIME_SINCE(source, opts, state, none, action) {
         let timeRequired = timeObjToMs(opts.getText('time'))
 
         const lastUsed = await checkCooldown(
@@ -61,7 +60,16 @@ module.exports = {
             timeRequired,
         )
 
-        return Date.now() - lastUsed > timeRequired
+        const now = Date.now()
+
+        const placeholders = { '$remaining': timeDiffString(timeRequired, now - lastUsed) }
+
+        for(const [key, value] of Object.entries(action)) {
+            if (typeof value == 'object') action[key] = JSON.parse(await replacePlaceholders(JSON.stringify(value), placeholders))
+            else action[key] = await replacePlaceholders(value, placeholders)
+        }
+
+        return (now - lastUsed > timeRequired)
     },
 
     async HAS_ARGS(source, opts, state) {
